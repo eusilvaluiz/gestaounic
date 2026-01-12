@@ -104,8 +104,11 @@ export const calculateFunnel = (totals: TotalsData): FunnelData[] => {
 };
 
 export const calculateFinanceMetrics = (totals: TotalsData, finance: FinanceData) => {
-  // Receita = Vendas + REV 10%
-  const receita = totals.vendas + totals.rev10;
+  // Receita = apenas Vendas (REV 10% é custo, não receita)
+  const receita = totals.vendas;
+  
+  // REV 10% é custo pago à plataforma white label
+  const rev10 = totals.rev10;
   
   // Custo por FTD usando investimento da tabela diária
   const custoFtd = totals.ftd > 0 ? totals.investimento / totals.ftd : 0;
@@ -113,12 +116,12 @@ export const calculateFinanceMetrics = (totals: TotalsData, finance: FinanceData
   const ticketMedioTotal = totals.depositos > 0 ? totals.valorDepositos / totals.depositos : 0;
   const roiDeposito = totals.investimento > 0 ? totals.valorDepositos / totals.investimento : 0;
   
-  // Lucro Líquido = (Vendas + REV 10%) - (Investimento + Taxa + Saque + Expert)
-  const lucroLiquido = receita - (totals.investimento + finance.taxa + finance.saque + finance.expert);
+  // Lucro Líquido = Vendas - REV 10% - Investimento - Taxa - Saque - Expert
+  const lucroLiquido = totals.vendas - totals.rev10 - totals.investimento - finance.taxa - finance.saque - finance.expert;
   
-  // ROI Operação = (Vendas + REV 10% - Taxa - Saque - Expert) / Investimento
+  // ROI Operação = (Vendas - REV 10% - Taxa - Saque - Expert) / Investimento
   const roiOperacao = totals.investimento > 0 
-    ? (receita - finance.taxa - finance.saque - finance.expert) / totals.investimento 
+    ? (totals.vendas - totals.rev10 - finance.taxa - finance.saque - finance.expert) / totals.investimento 
     : 0;
 
   return {
@@ -128,7 +131,8 @@ export const calculateFinanceMetrics = (totals: TotalsData, finance: FinanceData
     roiDeposito,
     lucroLiquido,
     roiOperacao,
-    receita, // Expondo para exibição
+    receita, // Vendas (exibição)
+    rev10, // REV 10% como custo (exibição)
     investimento: totals.investimento, // Expondo para exibição
     deposito: totals.valorDepositos // Expondo para exibição
   };
