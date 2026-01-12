@@ -28,6 +28,7 @@ export type Database = {
           lead_telegram: number
           rev10: number
           saida_telegram: number
+          sort_order: number | null
           updated_at: string
           valor_depositos: number
           valor_ftd: number
@@ -46,6 +47,7 @@ export type Database = {
           lead_telegram?: number
           rev10?: number
           saida_telegram?: number
+          sort_order?: number | null
           updated_at?: string
           valor_depositos?: number
           valor_ftd?: number
@@ -64,6 +66,7 @@ export type Database = {
           lead_telegram?: number
           rev10?: number
           saida_telegram?: number
+          sort_order?: number | null
           updated_at?: string
           valor_depositos?: number
           valor_ftd?: number

@@ -13,6 +13,7 @@ export interface DailyData {
   valorDepositos: number;
   rev10: number;
   vendas: number;
+  sortOrder?: number;
 }
 
 export interface CalculatedMetrics {

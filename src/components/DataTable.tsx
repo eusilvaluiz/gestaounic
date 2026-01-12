@@ -1,7 +1,7 @@
 import { DailyData, CalculatedMetrics } from "@/types/marketing";
 import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
 import { CurrencyInput } from "@/components/CurrencyInput";
-import { Trash2, Plus, Loader2 } from "lucide-react";
+import { Trash2, Plus, Loader2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,24 +12,228 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface DataTableProps {
   data: DailyData[];
   onDataChange: (data: DailyData[]) => void;
   onAddRow?: () => Promise<DailyData | null>;
   onDeleteRow?: (id: string) => Promise<void>;
+  onReorderRows?: (activeId: string, overId: string) => Promise<void>;
   isLoading?: boolean;
   isSaving?: boolean;
 }
+
+// Sortable row component
+interface SortableRowProps {
+  row: DailyData;
+  metrics: CalculatedMetrics;
+  handleCellChange: (id: string, field: keyof DailyData, value: string | number) => void;
+  handleDeleteRow: (id: string) => void;
+  renderMetricsCell: (value: number, isPercent?: boolean, isCurrency?: boolean) => JSX.Element;
+  isSaving: boolean;
+}
+
+const SortableRow = ({
+  row,
+  metrics,
+  handleCellChange,
+  handleDeleteRow,
+  renderMetricsCell,
+  isSaving,
+}: SortableRowProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: row.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style} className="border-border hover:bg-accent/50">
+      <TableCell
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing w-10"
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </TableCell>
+      <TableCell>
+        <Input
+          value={row.data}
+          onChange={(e) => handleCellChange(row.id, "data", e.target.value)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          placeholder="dd/mm"
+        />
+      </TableCell>
+      <TableCell>
+        <CurrencyInput
+          value={row.investimento}
+          onChange={(val) => handleCellChange(row.id, "investimento", val)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          placeholder="0,00"
+        />
+      </TableCell>
+      <TableCell>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={row.cliques || ""}
+          onChange={(e) => handleCellChange(row.id, "cliques", e.target.value)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>{renderMetricsCell(metrics.cpc, false, true)}</TableCell>
+      <TableCell>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={row.landingPage || ""}
+          onChange={(e) => handleCellChange(row.id, "landingPage", e.target.value)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>{renderMetricsCell(metrics.cpv, false, true)}</TableCell>
+      <TableCell>{renderMetricsCell(metrics.cliqueLp, true)}</TableCell>
+      <TableCell>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={row.leadTelegram || ""}
+          onChange={(e) => handleCellChange(row.id, "leadTelegram", e.target.value)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={row.saidaTelegram || ""}
+          onChange={(e) => handleCellChange(row.id, "saidaTelegram", e.target.value)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>{renderMetricsCell(metrics.retencaoTelegram, true)}</TableCell>
+      <TableCell>{renderMetricsCell(metrics.custoLead, false, true)}</TableCell>
+      <TableCell>{renderMetricsCell(metrics.lpTelegram, true)}</TableCell>
+      <TableCell>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={row.cadastros || ""}
+          onChange={(e) => handleCellChange(row.id, "cadastros", e.target.value)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>{renderMetricsCell(metrics.custoCadastro, false, true)}</TableCell>
+      <TableCell>{renderMetricsCell(metrics.leadCadastro, true)}</TableCell>
+      <TableCell>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={row.ftd || ""}
+          onChange={(e) => handleCellChange(row.id, "ftd", e.target.value)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
+        <CurrencyInput
+          value={row.valorFtd}
+          onChange={(val) => handleCellChange(row.id, "valorFtd", val)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>{renderMetricsCell(metrics.custoFtd, false, true)}</TableCell>
+      <TableCell>{renderMetricsCell(metrics.cadastroFtd, true)}</TableCell>
+      <TableCell>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={row.depositos || ""}
+          onChange={(e) => handleCellChange(row.id, "depositos", e.target.value)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
+        <CurrencyInput
+          value={row.valorDepositos}
+          onChange={(val) => handleCellChange(row.id, "valorDepositos", val)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
+        <CurrencyInput
+          value={row.rev10}
+          onChange={(val) => handleCellChange(row.id, "rev10", val)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
+        <CurrencyInput
+          value={row.vendas}
+          onChange={(val) => handleCellChange(row.id, "vendas", val)}
+          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
+        <span className={`font-mono text-sm font-bold ${metrics.roi >= 1 ? 'text-success' : 'text-destructive'}`}>
+          {isFinite(metrics.roi) ? metrics.roi.toFixed(2) : "-"}
+        </span>
+      </TableCell>
+      <TableCell>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleDeleteRow(row.id)}
+          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          disabled={isSaving}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 export const DataTable = ({ 
   data, 
   onDataChange, 
   onAddRow, 
   onDeleteRow,
+  onReorderRows,
   isLoading = false,
   isSaving = false 
 }: DataTableProps) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const handleCellChange = (id: string, field: keyof DailyData, value: string | number) => {
     const updatedData = data.map((row) => {
       if (row.id === id) {
@@ -82,6 +286,14 @@ export const DataTable = ({
     }
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id && onReorderRows) {
+      await onReorderRows(active.id as string, over.id as string);
+    }
+  };
+
   const renderMetricsCell = (value: number, isPercent = false, isCurrency = false) => {
     if (!isFinite(value) || isNaN(value)) return <span className="text-muted-foreground">-</span>;
     if (isCurrency) return <span className="text-info font-mono text-xs">{formatCurrency(value)}</span>;
@@ -116,188 +328,71 @@ export const DataTable = ({
         </Button>
       </div>
       <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent border-border">
-              <TableHead className="text-muted-foreground font-semibold min-w-[90px]">Data</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Investimento</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cliques</TableHead>
-              <TableHead className="text-info font-semibold min-w-[100px]">CPC</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">LP</TableHead>
-              <TableHead className="text-info font-semibold min-w-[100px]">CPV</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[95px]">Clique→LP</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Lead Telegram</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Saída</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[95px]">Retenção</TableHead>
-              <TableHead className="text-info font-semibold min-w-[100px]">Custo Lead</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[95px]">LP→Telegram</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cadastros</TableHead>
-              <TableHead className="text-info font-semibold min-w-[100px]">Custo Cadastro</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[95px]">Lead→Cadastro</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">FTD</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Valor FTD</TableHead>
-              <TableHead className="text-info font-semibold min-w-[100px]">Custo FTD</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[95px]">Cadastro→FTD</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Depósitos</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Valor Depósitos</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">REV (10%)</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Vendas</TableHead>
-              <TableHead className="text-success font-semibold min-w-[75px]">ROI</TableHead>
-              <TableHead className="w-10"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={25} className="text-center py-8 text-muted-foreground">
-                  Nenhum dado encontrado. Clique em "Nova Linha" para começar.
-                </TableCell>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent border-border">
+                <TableHead className="w-10"></TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[90px]">Data</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Investimento</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cliques</TableHead>
+                <TableHead className="text-info font-semibold min-w-[100px]">CPC</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[85px]">LP</TableHead>
+                <TableHead className="text-info font-semibold min-w-[100px]">CPV</TableHead>
+                <TableHead className="text-warning font-semibold min-w-[95px]">Clique→LP</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Lead Telegram</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Saída</TableHead>
+                <TableHead className="text-warning font-semibold min-w-[95px]">Retenção</TableHead>
+                <TableHead className="text-info font-semibold min-w-[100px]">Custo Lead</TableHead>
+                <TableHead className="text-warning font-semibold min-w-[95px]">LP→Telegram</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cadastros</TableHead>
+                <TableHead className="text-info font-semibold min-w-[100px]">Custo Cadastro</TableHead>
+                <TableHead className="text-warning font-semibold min-w-[95px]">Lead→Cadastro</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[85px]">FTD</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Valor FTD</TableHead>
+                <TableHead className="text-info font-semibold min-w-[100px]">Custo FTD</TableHead>
+                <TableHead className="text-warning font-semibold min-w-[95px]">Cadastro→FTD</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Depósitos</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Valor Depósitos</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">REV (10%)</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Vendas</TableHead>
+                <TableHead className="text-success font-semibold min-w-[75px]">ROI</TableHead>
+                <TableHead className="w-10"></TableHead>
               </TableRow>
-            ) : (
-              data.map((row) => {
-                const metrics: CalculatedMetrics = calculateMetrics(row);
-                
-                return (
-                  <TableRow key={row.id} className="border-border hover:bg-accent/50">
-                    <TableCell>
-                      <Input
-                        value={row.data}
-                        onChange={(e) => handleCellChange(row.id, "data", e.target.value)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                        placeholder="dd/mm"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <CurrencyInput
-                        value={row.investimento}
-                        onChange={(val) => handleCellChange(row.id, "investimento", val)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                        placeholder="0,00"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={row.cliques || ""}
-                        onChange={(e) => handleCellChange(row.id, "cliques", e.target.value)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>{renderMetricsCell(metrics.cpc, false, true)}</TableCell>
-                    <TableCell>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={row.landingPage || ""}
-                        onChange={(e) => handleCellChange(row.id, "landingPage", e.target.value)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>{renderMetricsCell(metrics.cpv, false, true)}</TableCell>
-                    <TableCell>{renderMetricsCell(metrics.cliqueLp, true)}</TableCell>
-                    <TableCell>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={row.leadTelegram || ""}
-                        onChange={(e) => handleCellChange(row.id, "leadTelegram", e.target.value)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={row.saidaTelegram || ""}
-                        onChange={(e) => handleCellChange(row.id, "saidaTelegram", e.target.value)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>{renderMetricsCell(metrics.retencaoTelegram, true)}</TableCell>
-                    <TableCell>{renderMetricsCell(metrics.custoLead, false, true)}</TableCell>
-                    <TableCell>{renderMetricsCell(metrics.lpTelegram, true)}</TableCell>
-                    <TableCell>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={row.cadastros || ""}
-                        onChange={(e) => handleCellChange(row.id, "cadastros", e.target.value)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>{renderMetricsCell(metrics.custoCadastro, false, true)}</TableCell>
-                    <TableCell>{renderMetricsCell(metrics.leadCadastro, true)}</TableCell>
-                    <TableCell>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={row.ftd || ""}
-                        onChange={(e) => handleCellChange(row.id, "ftd", e.target.value)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <CurrencyInput
-                        value={row.valorFtd}
-                        onChange={(val) => handleCellChange(row.id, "valorFtd", val)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>{renderMetricsCell(metrics.custoFtd, false, true)}</TableCell>
-                    <TableCell>{renderMetricsCell(metrics.cadastroFtd, true)}</TableCell>
-                    <TableCell>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={row.depositos || ""}
-                        onChange={(e) => handleCellChange(row.id, "depositos", e.target.value)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <CurrencyInput
-                        value={row.valorDepositos}
-                        onChange={(val) => handleCellChange(row.id, "valorDepositos", val)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <CurrencyInput
-                        value={row.rev10}
-                        onChange={(val) => handleCellChange(row.id, "rev10", val)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <CurrencyInput
-                        value={row.vendas}
-                        onChange={(val) => handleCellChange(row.id, "vendas", val)}
-                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <span className={`font-mono text-sm font-bold ${metrics.roi >= 1 ? 'text-success' : 'text-destructive'}`}>
-                        {isFinite(metrics.roi) ? metrics.roi.toFixed(2) : "-"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteRow(row.id)}
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        disabled={isSaving}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+            </TableHeader>
+            <SortableContext items={data.map(d => d.id)} strategy={verticalListSortingStrategy}>
+              <TableBody>
+                {data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={26} className="text-center py-8 text-muted-foreground">
+                      Nenhum dado encontrado. Clique em "Nova Linha" para começar.
                     </TableCell>
                   </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                ) : (
+                  data.map((row) => {
+                    const metrics: CalculatedMetrics = calculateMetrics(row);
+                    
+                    return (
+                      <SortableRow
+                        key={row.id}
+                        row={row}
+                        metrics={metrics}
+                        handleCellChange={handleCellChange}
+                        handleDeleteRow={handleDeleteRow}
+                        renderMetricsCell={renderMetricsCell}
+                        isSaving={isSaving}
+                      />
+                    );
+                  })
+                )}
+              </TableBody>
+            </SortableContext>
+          </Table>
+        </DndContext>
       </div>
     </div>
   );
