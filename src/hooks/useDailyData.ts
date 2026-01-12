@@ -18,6 +18,7 @@ interface DbDailyData {
   valor_depositos: number;
   rev10: number;
   vendas: number;
+  sort_order: number;
 }
 
 const mapDbToLocal = (row: DbDailyData): DailyData => ({
@@ -35,6 +36,7 @@ const mapDbToLocal = (row: DbDailyData): DailyData => ({
   valorDepositos: Number(row.valor_depositos),
   rev10: Number(row.rev10),
   vendas: row.vendas,
+  sortOrder: row.sort_order,
 });
 
 const mapLocalToDb = (row: DailyData): Omit<DbDailyData, 'id'> & { id?: string } => ({
@@ -52,6 +54,7 @@ const mapLocalToDb = (row: DailyData): Omit<DbDailyData, 'id'> & { id?: string }
   valor_depositos: row.valorDepositos,
   rev10: row.rev10,
   vendas: row.vendas,
+  sort_order: row.sortOrder ?? 0,
 });
 
 export const useDailyData = () => {
@@ -67,7 +70,7 @@ export const useDailyData = () => {
       const { data: rows, error } = await supabase
         .from("daily_data")
         .select("*")
-        .order("data", { ascending: true });
+        .order("sort_order", { ascending: true });
 
       if (error) throw error;
 
@@ -113,6 +116,11 @@ export const useDailyData = () => {
   const addRow = useCallback(async (): Promise<DailyData | null> => {
     try {
       setIsSaving(true);
+      // Get max sort_order to place new row at the end
+      const maxSortOrder = data.length > 0 
+        ? Math.max(...data.map(d => d.sortOrder ?? 0)) 
+        : 0;
+
       const newRow = {
         data: new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         investimento: 0,
@@ -127,6 +135,7 @@ export const useDailyData = () => {
         valor_depositos: 0,
         rev10: 0,
         vendas: 0,
+        sort_order: maxSortOrder + 1,
       };
 
       const { data: inserted, error } = await supabase
@@ -188,6 +197,59 @@ export const useDailyData = () => {
     }
   }, [toast]);
 
+  // Reorder rows (for drag and drop)
+  const reorderRows = useCallback(async (activeId: string, overId: string) => {
+    if (activeId === overId) return;
+
+    try {
+      setIsSaving(true);
+      
+      const oldIndex = data.findIndex(row => row.id === activeId);
+      const newIndex = data.findIndex(row => row.id === overId);
+      
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      // Create new array with reordered items
+      const newData = [...data];
+      const [movedItem] = newData.splice(oldIndex, 1);
+      newData.splice(newIndex, 0, movedItem);
+
+      // Update sort_order for all items
+      const updatedData = newData.map((row, index) => ({
+        ...row,
+        sortOrder: index + 1,
+      }));
+
+      setData(updatedData);
+
+      // Save new order to database
+      const updates = updatedData.map(row => ({
+        id: row.id,
+        sort_order: row.sortOrder,
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from("daily_data")
+          .update({ sort_order: update.sort_order })
+          .eq("id", update.id);
+        
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error reordering rows:", error);
+      toast({
+        title: "Erro ao reordenar",
+        description: "Não foi possível salvar a nova ordem.",
+        variant: "destructive",
+      });
+      // Refetch to restore correct order
+      fetchData();
+    } finally {
+      setIsSaving(false);
+    }
+  }, [data, toast, fetchData]);
+
   // Update local state and save to database
   const updateData = useCallback((newData: DailyData[]) => {
     const oldData = data;
@@ -213,6 +275,7 @@ export const useDailyData = () => {
     isSaving,
     addRow,
     deleteRow,
+    reorderRows,
     refetch: fetchData,
   };
 };

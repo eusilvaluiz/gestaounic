@@ -61,7 +61,8 @@ const Index = () => {
     isLoading: isLoadingData, 
     isSaving: isSavingData,
     addRow,
-    deleteRow 
+    deleteRow,
+    reorderRows
   } = useDailyData();
   
   const { 
@@ -293,6 +294,7 @@ const Index = () => {
           onDataChange={setData}
           onAddRow={addRow}
           onDeleteRow={deleteRow}
+          onReorderRows={reorderRows}
           isLoading={isLoadingData}
           isSaving={isSavingData}
         />
