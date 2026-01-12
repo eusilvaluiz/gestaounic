@@ -33,12 +33,12 @@ export const FinancePanel = ({ finance, totals, onFinanceChange }: FinancePanelP
       </h3>
       
       {/* Valores Automáticos (somente leitura) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Investimento (auto)</Label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
-            <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm text-foreground">
+            <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm font-medium text-destructive">
               {formatCurrency(metrics.investimento)}
             </div>
           </div>
@@ -48,28 +48,8 @@ export const FinancePanel = ({ finance, totals, onFinanceChange }: FinancePanelP
           <Label className="text-xs text-muted-foreground">Depósito (auto)</Label>
           <div className="relative">
             <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />
-            <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm text-foreground">
-              {formatCurrency(metrics.deposito)}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Receita (Vendas)</Label>
-          <div className="relative">
-            <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />
             <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm font-medium text-success">
-              {formatCurrency(metrics.receita)}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">REV 10% (Custo WL)</Label>
-          <div className="relative">
-            <TrendingDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
-            <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm font-medium text-destructive">
-              -{formatCurrency(metrics.rev10)}
+              {formatCurrency(metrics.deposito)}
             </div>
           </div>
         </div>
