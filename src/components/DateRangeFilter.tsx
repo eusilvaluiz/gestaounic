@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -72,12 +72,18 @@ export const getDateRangeFromOption = (
 
 export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilterProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [tempValue, setTempValue] = useState<DateRangeOption>(value);
   const [tempRange, setTempRange] = useState<{ from?: Date; to?: Date }>({
     from: customRange?.from,
     to: customRange?.to,
   });
 
   const currentRange = getDateRangeFromOption(value, customRange);
+
+  // Sincronizar tempValue com value externo
+  useEffect(() => {
+    setTempValue(value);
+  }, [value]);
   
   const getDisplayLabel = () => {
     const option = filterOptions.find(o => o.value === value);
@@ -90,10 +96,21 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
   const handleOptionChange = (newValue: string) => {
     const option = newValue as DateRangeOption;
     if (option === "custom") {
-      setIsCalendarOpen(true);
+      setTempValue("custom"); // Mostra "Personalizado" imediatamente
       setTempRange({ from: currentRange.from, to: currentRange.to });
+      // Usar setTimeout para evitar conflito com o fechamento do Select
+      setTimeout(() => setIsCalendarOpen(true), 100);
     } else {
+      setTempValue(option);
       onChange(option);
+    }
+  };
+
+  const handlePopoverOpenChange = (open: boolean) => {
+    setIsCalendarOpen(open);
+    // Se fechar sem aplicar, volta para o valor original
+    if (!open && tempValue === "custom" && value !== "custom") {
+      setTempValue(value);
     }
   };
 
@@ -117,7 +134,7 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground">Período:</span>
       
-      <Select value={value} onValueChange={handleOptionChange}>
+      <Select value={tempValue} onValueChange={handleOptionChange}>
         <SelectTrigger className="w-[180px] bg-card border-border">
           <SelectValue>{getDisplayLabel()}</SelectValue>
         </SelectTrigger>
@@ -143,11 +160,16 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
       )}
 
       {/* Popover sempre renderizado, controlado pelo estado isCalendarOpen */}
-      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+      <Popover open={isCalendarOpen} onOpenChange={handlePopoverOpenChange}>
         <PopoverTrigger asChild>
           <span className="hidden" />
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
+        <PopoverContent 
+          className="w-auto p-0 bg-card border-border" 
+          align="start"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           <div className="p-3">
             <Calendar
               mode="range"
