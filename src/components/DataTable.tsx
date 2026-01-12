@@ -109,30 +109,30 @@ export const DataTable = ({
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-border">
-              <TableHead className="text-muted-foreground font-semibold min-w-[80px]">Data</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[120px]">Investimento</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[80px]">Cliques</TableHead>
-              <TableHead className="text-info font-semibold min-w-[80px]">CPC</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[80px]">LP</TableHead>
-              <TableHead className="text-info font-semibold min-w-[80px]">CPV</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[80px]">Clique→LP</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[90px]">Data</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Investimento</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cliques</TableHead>
+              <TableHead className="text-info font-semibold min-w-[100px]">CPC</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">LP</TableHead>
+              <TableHead className="text-info font-semibold min-w-[100px]">CPV</TableHead>
+              <TableHead className="text-warning font-semibold min-w-[95px]">Clique→LP</TableHead>
               <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Lead Telegram</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[80px]">Saída</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[90px]">Retenção</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Saída</TableHead>
+              <TableHead className="text-warning font-semibold min-w-[95px]">Retenção</TableHead>
               <TableHead className="text-info font-semibold min-w-[100px]">Custo Lead</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[90px]">LP→Telegram</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[80px]">Cadastros</TableHead>
-              <TableHead className="text-info font-semibold min-w-[110px]">Custo Cadastro</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[100px]">Lead→Cadastro</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[60px]">FTD</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Valor FTD</TableHead>
+              <TableHead className="text-warning font-semibold min-w-[95px]">LP→Telegram</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cadastros</TableHead>
+              <TableHead className="text-info font-semibold min-w-[100px]">Custo Cadastro</TableHead>
+              <TableHead className="text-warning font-semibold min-w-[95px]">Lead→Cadastro</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">FTD</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Valor FTD</TableHead>
               <TableHead className="text-info font-semibold min-w-[100px]">Custo FTD</TableHead>
-              <TableHead className="text-warning font-semibold min-w-[100px]">Cadastro→FTD</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[80px]">Depósitos</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[120px]">Valor Depósitos</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[100px]">REV (10%)</TableHead>
-              <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Vendas</TableHead>
-              <TableHead className="text-success font-semibold min-w-[60px]">ROI</TableHead>
+              <TableHead className="text-warning font-semibold min-w-[95px]">Cadastro→FTD</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Depósitos</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Valor Depósitos</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">REV (10%)</TableHead>
+              <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Vendas</TableHead>
+              <TableHead className="text-success font-semibold min-w-[75px]">ROI</TableHead>
               <TableHead className="w-10"></TableHead>
             </TableRow>
           </TableHeader>
@@ -153,7 +153,7 @@ export const DataTable = ({
                       <Input
                         value={row.data}
                         onChange={(e) => handleCellChange(row.id, "data", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                         placeholder="dd/mm"
                       />
                     </TableCell>
@@ -163,7 +163,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.investimento || ""}
                         onChange={(e) => handleCellChange(row.id, "investimento", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                         placeholder="0,00"
                       />
                     </TableCell>
@@ -173,7 +173,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.cliques || ""}
                         onChange={(e) => handleCellChange(row.id, "cliques", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>{renderMetricsCell(metrics.cpc, false, true)}</TableCell>
@@ -183,7 +183,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.landingPage || ""}
                         onChange={(e) => handleCellChange(row.id, "landingPage", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>{renderMetricsCell(metrics.cpv, false, true)}</TableCell>
@@ -194,7 +194,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.leadTelegram || ""}
                         onChange={(e) => handleCellChange(row.id, "leadTelegram", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>
@@ -203,7 +203,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.saidaTelegram || ""}
                         onChange={(e) => handleCellChange(row.id, "saidaTelegram", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>{renderMetricsCell(metrics.retencaoTelegram, true)}</TableCell>
@@ -215,7 +215,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.cadastros || ""}
                         onChange={(e) => handleCellChange(row.id, "cadastros", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>{renderMetricsCell(metrics.custoCadastro, false, true)}</TableCell>
@@ -226,7 +226,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.ftd || ""}
                         onChange={(e) => handleCellChange(row.id, "ftd", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>
@@ -235,7 +235,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.valorFtd || ""}
                         onChange={(e) => handleCellChange(row.id, "valorFtd", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>{renderMetricsCell(metrics.custoFtd, false, true)}</TableCell>
@@ -246,7 +246,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.depositos || ""}
                         onChange={(e) => handleCellChange(row.id, "depositos", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>
@@ -255,7 +255,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.valorDepositos || ""}
                         onChange={(e) => handleCellChange(row.id, "valorDepositos", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>
@@ -264,7 +264,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.rev10 || ""}
                         onChange={(e) => handleCellChange(row.id, "rev10", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>
@@ -273,7 +273,7 @@ export const DataTable = ({
                         inputMode="decimal"
                         value={row.vendas || ""}
                         onChange={(e) => handleCellChange(row.id, "vendas", e.target.value)}
-                        className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
                     </TableCell>
                     <TableCell>
