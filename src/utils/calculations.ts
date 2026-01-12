@@ -138,3 +138,20 @@ export const formatNumber = (value: number): string => {
   if (isNaN(value) || !isFinite(value)) return "0";
   return new Intl.NumberFormat('pt-BR').format(value);
 };
+
+// Formata número para exibição em input no padrão brasileiro (sem símbolo R$)
+export const formatCurrencyInput = (value: number): string => {
+  if (!value || value === 0) return "";
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+};
+
+// Converte string formatada (padrão brasileiro) para número
+export const parseCurrencyInput = (value: string): number => {
+  if (!value) return 0;
+  // Remove pontos de milhar e troca vírgula por ponto
+  const cleaned = value.replace(/\./g, "").replace(",", ".");
+  return parseFloat(cleaned) || 0;
+};

@@ -1,5 +1,5 @@
 import { DailyData, CalculatedMetrics } from "@/types/marketing";
-import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
+import { calculateMetrics, formatCurrency, formatPercent, formatCurrencyInput, parseCurrencyInput } from "@/utils/calculations";
 import { Trash2, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,10 +29,21 @@ export const DataTable = ({
   isLoading = false,
   isSaving = false 
 }: DataTableProps) => {
+  const currencyFields = ["investimento", "valorFtd", "valorDepositos", "rev10", "vendas"];
+
   const handleCellChange = (id: string, field: keyof DailyData, value: string) => {
     const updatedData = data.map((row) => {
       if (row.id === id) {
-        const numValue = field === "data" ? value : parseFloat(value.replace(",", ".")) || 0;
+        let numValue: string | number;
+        
+        if (field === "data") {
+          numValue = value;
+        } else if (currencyFields.includes(field)) {
+          numValue = parseCurrencyInput(value);
+        } else {
+          numValue = parseFloat(value.replace(",", ".")) || 0;
+        }
+        
         return { ...row, [field]: numValue };
       }
       return row;
@@ -161,7 +172,7 @@ export const DataTable = ({
                       <Input
                         type="text"
                         inputMode="decimal"
-                        value={row.investimento || ""}
+                        value={formatCurrencyInput(row.investimento)}
                         onChange={(e) => handleCellChange(row.id, "investimento", e.target.value)}
                         className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                         placeholder="0,00"
@@ -233,7 +244,7 @@ export const DataTable = ({
                       <Input
                         type="text"
                         inputMode="decimal"
-                        value={row.valorFtd || ""}
+                        value={formatCurrencyInput(row.valorFtd)}
                         onChange={(e) => handleCellChange(row.id, "valorFtd", e.target.value)}
                         className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
@@ -253,7 +264,7 @@ export const DataTable = ({
                       <Input
                         type="text"
                         inputMode="decimal"
-                        value={row.valorDepositos || ""}
+                        value={formatCurrencyInput(row.valorDepositos)}
                         onChange={(e) => handleCellChange(row.id, "valorDepositos", e.target.value)}
                         className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
@@ -262,7 +273,7 @@ export const DataTable = ({
                       <Input
                         type="text"
                         inputMode="decimal"
-                        value={row.rev10 || ""}
+                        value={formatCurrencyInput(row.rev10)}
                         onChange={(e) => handleCellChange(row.id, "rev10", e.target.value)}
                         className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
@@ -271,7 +282,7 @@ export const DataTable = ({
                       <Input
                         type="text"
                         inputMode="decimal"
-                        value={row.vendas || ""}
+                        value={formatCurrencyInput(row.vendas)}
                         onChange={(e) => handleCellChange(row.id, "vendas", e.target.value)}
                         className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
                       />
