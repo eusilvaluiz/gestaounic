@@ -8,7 +8,6 @@ import {
   TrendingDown, 
   Wallet, 
   Users, 
-  ArrowUpRight,
   ArrowDownRight
 } from "lucide-react";
 
@@ -33,35 +32,41 @@ export const FinancePanel = ({ finance, totals, onFinanceChange }: FinancePanelP
         Resumo Financeiro
       </h3>
       
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      {/* Valores Automáticos (somente leitura) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Investimento</Label>
+          <Label className="text-xs text-muted-foreground">Investimento (auto)</Label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
-            <Input
-              type="number"
-              value={finance.investimento || ""}
-              onChange={(e) => handleChange("investimento", e.target.value)}
-              className="pl-9 h-10 bg-accent border-border"
-              placeholder="0,00"
-            />
+            <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm text-foreground">
+              {formatCurrency(metrics.investimento)}
+            </div>
           </div>
         </div>
         
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Depósito</Label>
+          <Label className="text-xs text-muted-foreground">Depósito (auto)</Label>
           <div className="relative">
             <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />
-            <Input
-              type="number"
-              value={finance.deposito || ""}
-              onChange={(e) => handleChange("deposito", e.target.value)}
-              className="pl-9 h-10 bg-accent border-border"
-              placeholder="0,00"
-            />
+            <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm text-foreground">
+              {formatCurrency(metrics.deposito)}
+            </div>
           </div>
         </div>
-        
+
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Receita (Vendas + REV)</Label>
+          <div className="relative">
+            <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />
+            <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm font-medium text-success">
+              {formatCurrency(metrics.receita)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Campos Editáveis */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Taxa</Label>
           <div className="relative">
@@ -105,6 +110,7 @@ export const FinancePanel = ({ finance, totals, onFinanceChange }: FinancePanelP
         </div>
       </div>
       
+      {/* Métricas Calculadas */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-4 border-t border-border">
         <div className="text-center p-3 rounded-lg bg-accent">
           <p className="text-xs text-muted-foreground mb-1">Custo por FTD</p>

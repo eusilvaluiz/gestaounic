@@ -104,12 +104,22 @@ export const calculateFunnel = (totals: TotalsData): FunnelData[] => {
 };
 
 export const calculateFinanceMetrics = (totals: TotalsData, finance: FinanceData) => {
-  const custoFtd = totals.ftd > 0 ? finance.investimento / totals.ftd : 0;
+  // Receita = Vendas + REV 10%
+  const receita = totals.vendas + totals.rev10;
+  
+  // Custo por FTD usando investimento da tabela diária
+  const custoFtd = totals.ftd > 0 ? totals.investimento / totals.ftd : 0;
   const ticketMedioFtd = totals.ftd > 0 ? totals.valorFtd / totals.ftd : 0;
   const ticketMedioTotal = totals.depositos > 0 ? totals.valorDepositos / totals.depositos : 0;
-  const roiDeposito = finance.investimento > 0 ? totals.valorDepositos / finance.investimento : 0;
-  const lucroLiquido = finance.deposito - finance.taxa - finance.saque - finance.expert - finance.investimento;
-  const roiOperacao = finance.investimento > 0 ? (finance.deposito - finance.taxa - finance.saque - finance.expert) / finance.investimento : 0;
+  const roiDeposito = totals.investimento > 0 ? totals.valorDepositos / totals.investimento : 0;
+  
+  // Lucro Líquido = (Vendas + REV 10%) - (Investimento + Taxa + Saque + Expert)
+  const lucroLiquido = receita - (totals.investimento + finance.taxa + finance.saque + finance.expert);
+  
+  // ROI Operação = (Vendas + REV 10% - Taxa - Saque - Expert) / Investimento
+  const roiOperacao = totals.investimento > 0 
+    ? (receita - finance.taxa - finance.saque - finance.expert) / totals.investimento 
+    : 0;
 
   return {
     custoFtd,
@@ -117,7 +127,10 @@ export const calculateFinanceMetrics = (totals: TotalsData, finance: FinanceData
     ticketMedioTotal,
     roiDeposito,
     lucroLiquido,
-    roiOperacao
+    roiOperacao,
+    receita, // Expondo para exibição
+    investimento: totals.investimento, // Expondo para exibição
+    deposito: totals.valorDepositos // Expondo para exibição
   };
 };
 
