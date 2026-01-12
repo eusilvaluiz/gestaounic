@@ -55,11 +55,21 @@ export const FinancePanel = ({ finance, totals, onFinanceChange }: FinancePanelP
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Receita (Vendas + REV)</Label>
+          <Label className="text-xs text-muted-foreground">Receita (Vendas)</Label>
           <div className="relative">
             <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />
             <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm font-medium text-success">
               {formatCurrency(metrics.receita)}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">REV 10% (Custo WL)</Label>
+          <div className="relative">
+            <TrendingDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
+            <div className="pl-9 h-10 bg-muted/50 border border-border rounded-md flex items-center text-sm font-medium text-destructive">
+              -{formatCurrency(metrics.rev10)}
             </div>
           </div>
         </div>
