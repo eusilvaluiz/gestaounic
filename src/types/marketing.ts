@@ -53,8 +53,6 @@ export interface FunnelData {
 }
 
 export interface FinanceData {
-  investimento: number;
-  deposito: number;
   taxa: number;
   saque: number;
   expert: number;

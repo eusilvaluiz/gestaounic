@@ -5,16 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 
 interface DbFinanceData {
   id: string;
-  investimento: number;
-  deposito: number;
   taxa: number;
   saque: number;
   expert: number;
 }
 
 const defaultFinance: FinanceData = {
-  investimento: 0,
-  deposito: 0,
   taxa: 0,
   saque: 0,
   expert: 0,
@@ -42,8 +38,6 @@ export const useFinanceData = () => {
       if (rows) {
         setFinanceId(rows.id);
         setFinance({
-          investimento: Number(rows.investimento),
-          deposito: Number(rows.deposito),
           taxa: Number(rows.taxa),
           saque: Number(rows.saque),
           expert: Number(rows.expert),
@@ -67,8 +61,6 @@ export const useFinanceData = () => {
         const { error } = await supabase
           .from("finance_data")
           .update({
-            investimento: newFinance.investimento,
-            deposito: newFinance.deposito,
             taxa: newFinance.taxa,
             saque: newFinance.saque,
             expert: newFinance.expert,
@@ -81,8 +73,6 @@ export const useFinanceData = () => {
         const { data: inserted, error } = await supabase
           .from("finance_data")
           .insert({
-            investimento: newFinance.investimento,
-            deposito: newFinance.deposito,
             taxa: newFinance.taxa,
             saque: newFinance.saque,
             expert: newFinance.expert,
