@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { calculateTotals, calculateFunnel, formatCurrency, formatNumber, formatPercent } from "@/utils/calculations";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelChart } from "@/components/FunnelChart";
@@ -6,6 +7,8 @@ import { DataTable } from "@/components/DataTable";
 import { FinancePanel } from "@/components/FinancePanel";
 import { useDailyData } from "@/hooks/useDailyData";
 import { useFinanceData } from "@/hooks/useFinanceData";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 import { 
   DollarSign, 
   MousePointer, 
@@ -13,10 +16,15 @@ import {
   Target,
   TrendingUp,
   BarChart3,
-  Percent
+  Percent,
+  LogOut,
+  Loader2
 } from "lucide-react";
 
 const Index = () => {
+  const { user, isLoading: isAuthLoading, signOut } = useAuth();
+  const navigate = useNavigate();
+
   const { 
     data, 
     setData, 
@@ -31,6 +39,13 @@ const Index = () => {
     setFinance, 
     isLoading: isLoadingFinance 
   } = useFinanceData();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, isAuthLoading, navigate]);
 
   const totals = useMemo(() => calculateTotals(data), [data]);
   const funnelData = useMemo(() => calculateFunnel(totals), [totals]);
@@ -65,6 +80,25 @@ const Index = () => {
     };
   }, [totals]);
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
+  // Show loading while checking auth
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Don't render dashboard if not authenticated
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -78,9 +112,25 @@ const Index = () => {
               Análise de métricas e conversões de marketing digital
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent">
-            <span className="text-sm text-muted-foreground">Período:</span>
-            <span className="font-semibold text-foreground">Julho 2024</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent">
+              <span className="text-sm text-muted-foreground">Período:</span>
+              <span className="font-semibold text-foreground">Julho 2024</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent">
+              <span className="text-sm text-muted-foreground hidden sm:inline">
+                {user.user_metadata?.full_name || user.email}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSignOut}
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                title="Sair"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
