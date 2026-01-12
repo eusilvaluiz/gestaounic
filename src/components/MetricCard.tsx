@@ -42,11 +42,16 @@ export const MetricCard = ({
         className
       )}
     >
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
+      <div className="flex flex-col">
+        {icon && (
+          <div className={cn("p-2 rounded-lg bg-accent self-start mb-3", iconStyles[variant])}>
+            {icon}
+          </div>
+        )}
+        <div className="space-y-1 min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className={cn(
-            "text-2xl font-bold tracking-tight",
+            "text-2xl font-bold tracking-tight truncate",
             variant === "success" && "gradient-text-success",
             variant === "danger" && "gradient-text-danger",
             variant === "info" && "gradient-text-info",
@@ -59,11 +64,6 @@ export const MetricCard = ({
             <p className="text-xs text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        {icon && (
-          <div className={cn("p-2 rounded-lg bg-accent", iconStyles[variant])}>
-            {icon}
-          </div>
-        )}
       </div>
     </div>
   );
