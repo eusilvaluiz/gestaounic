@@ -144,4 +144,28 @@
       transform: translateY(0); 
     }
   }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(222 47% 10%);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(217 33% 25%);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(217 33% 35%);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: hsl(222 47% 10%);
+  }
 }
