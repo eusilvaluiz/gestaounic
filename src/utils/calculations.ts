@@ -107,7 +107,7 @@ export const calculateFinanceMetrics = (totals: TotalsData, finance: FinanceData
   // Custo por FTD usando investimento da tabela diária
   const custoFtd = totals.ftd > 0 ? totals.investimento / totals.ftd : 0;
   const ticketMedioFtd = totals.ftd > 0 ? totals.valorFtd / totals.ftd : 0;
-  const ticketMedioTotal = totals.depositos > 0 ? totals.valorDepositos / totals.depositos : 0;
+  const ticketMedioTotal = totals.ftd > 0 ? totals.valorDepositos / totals.ftd : 0;
   const roiDeposito = totals.investimento > 0 ? totals.valorDepositos / totals.investimento : 0;
   
   // Lucro Líquido = Depósito - Investimento - Taxa - Saque - Expert (conforme planilha original)
