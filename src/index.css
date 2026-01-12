@@ -80,6 +80,16 @@
 }
 
 @layer utilities {
+  /* Remove spinners de inputs numéricos */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
   .glass-effect {
     @apply bg-card/60 backdrop-blur-xl border border-border/50;
   }
