@@ -18,6 +18,9 @@ interface DbDailyData {
   valor_depositos: number;
   rev10: number;
   vendas: number;
+  taxa: number;
+  saque: number;
+  expert: number;
   sort_order: number;
 }
 
@@ -36,6 +39,9 @@ const mapDbToLocal = (row: DbDailyData): DailyData => ({
   valorDepositos: Number(row.valor_depositos),
   rev10: Number(row.rev10),
   vendas: row.vendas,
+  taxa: Number(row.taxa),
+  saque: Number(row.saque),
+  expert: Number(row.expert),
   sortOrder: row.sort_order,
 });
 
@@ -54,6 +60,9 @@ const mapLocalToDb = (row: DailyData): Omit<DbDailyData, 'id'> & { id?: string }
   valor_depositos: row.valorDepositos,
   rev10: row.rev10,
   vendas: row.vendas,
+  taxa: row.taxa,
+  saque: row.saque,
+  expert: row.expert,
   sort_order: row.sortOrder ?? 0,
 });
 
@@ -135,6 +144,9 @@ export const useDailyData = () => {
         valor_depositos: 0,
         rev10: 0,
         vendas: 0,
+        taxa: 0,
+        saque: 0,
+        expert: 0,
         sort_order: maxSortOrder + 1,
       };
 
