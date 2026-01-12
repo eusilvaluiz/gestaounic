@@ -130,43 +130,52 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
         </SelectContent>
       </Select>
 
+      {/* Botão de calendário só aparece quando custom está selecionado */}
       {value === "custom" && (
-        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="icon" className="bg-card border-border">
-              <CalendarIcon className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-            <div className="p-3">
-              <Calendar
-                mode="range"
-                selected={tempRange as { from: Date; to: Date }}
-                onSelect={handleCalendarSelect}
-                numberOfMonths={2}
-                locale={ptBR}
-                className="pointer-events-auto"
-              />
-              <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-border">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setIsCalendarOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={handleApplyCustomRange}
-                  disabled={!tempRange.from || !tempRange.to}
-                >
-                  Aplicar
-                </Button>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="bg-card border-border"
+          onClick={() => setIsCalendarOpen(true)}
+        >
+          <CalendarIcon className="h-4 w-4" />
+        </Button>
       )}
+
+      {/* Popover sempre renderizado, controlado pelo estado isCalendarOpen */}
+      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+        <PopoverTrigger asChild>
+          <span className="hidden" />
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
+          <div className="p-3">
+            <Calendar
+              mode="range"
+              selected={tempRange as { from: Date; to: Date }}
+              onSelect={handleCalendarSelect}
+              numberOfMonths={2}
+              locale={ptBR}
+              className="pointer-events-auto"
+            />
+            <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-border">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsCalendarOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleApplyCustomRange}
+                disabled={!tempRange.from || !tempRange.to}
+              >
+                Aplicar
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
