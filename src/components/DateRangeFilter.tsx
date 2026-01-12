@@ -86,10 +86,15 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
   }, [value]);
   
   const getDisplayLabel = () => {
-    const option = filterOptions.find(o => o.value === value);
-    if (value === "custom" && customRange) {
-      return `${format(customRange.from, "dd/MM", { locale: ptBR })} - ${format(customRange.to, "dd/MM", { locale: ptBR })}`;
+    // Usar tempValue para mostrar o estado atual (antes de aplicar)
+    if (tempValue === "custom") {
+      if (tempRange.from) {
+        const toDate = tempRange.to ?? tempRange.from;
+        return `${format(tempRange.from, "dd/MM", { locale: ptBR })} - ${format(toDate, "dd/MM", { locale: ptBR })}`;
+      }
+      return "Personalizado";
     }
+    const option = filterOptions.find(o => o.value === tempValue);
     return option?.label || "Últimos 7 dias";
   };
 
@@ -121,10 +126,11 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
   };
 
   const handleApplyCustomRange = () => {
-    if (tempRange.from && tempRange.to) {
+    if (tempRange.from) {
+      const toDate = tempRange.to ?? tempRange.from;
       onChange("custom", { 
         from: startOfDay(tempRange.from), 
-        to: endOfDay(tempRange.to) 
+        to: endOfDay(toDate) 
       });
       setIsCalendarOpen(false);
     }
@@ -173,7 +179,7 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
           <div className="p-3">
             <Calendar
               mode="range"
-              selected={tempRange as { from: Date; to: Date }}
+              selected={tempRange.from ? { from: tempRange.from, to: tempRange.to } : undefined}
               onSelect={handleCalendarSelect}
               numberOfMonths={2}
               locale={ptBR}
@@ -187,13 +193,13 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
               >
                 Cancelar
               </Button>
-              <Button 
-                size="sm" 
-                onClick={handleApplyCustomRange}
-                disabled={!tempRange.from || !tempRange.to}
-              >
-                Aplicar
-              </Button>
+                <Button 
+                  size="sm" 
+                  onClick={handleApplyCustomRange}
+                  disabled={!tempRange.from}
+                >
+                  Aplicar
+                </Button>
             </div>
           </div>
         </PopoverContent>
