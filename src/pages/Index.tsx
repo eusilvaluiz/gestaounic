@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
-import { DailyData, FinanceData } from "@/types/marketing";
+import { useMemo } from "react";
 import { calculateTotals, calculateFunnel, formatCurrency, formatNumber, formatPercent } from "@/utils/calculations";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelChart } from "@/components/FunnelChart";
 import { DataTable } from "@/components/DataTable";
 import { FinancePanel } from "@/components/FinancePanel";
+import { useDailyData } from "@/hooks/useDailyData";
+import { useFinanceData } from "@/hooks/useFinanceData";
 import { 
   DollarSign, 
   MousePointer, 
@@ -15,68 +16,21 @@ import {
   Percent
 } from "lucide-react";
 
-const initialData: DailyData[] = [
-  {
-    id: "1",
-    data: "01/07",
-    investimento: 2983.86,
-    cliques: 1757,
-    landingPage: 1400,
-    leadTelegram: 466,
-    saidaTelegram: 181,
-    cadastros: 37,
-    ftd: 10,
-    valorFtd: 4300,
-    depositos: 22,
-    valorDepositos: 7812,
-    rev10: 8.54,
-    vendas: 200.98,
-  },
-  {
-    id: "2",
-    data: "02/07",
-    investimento: 2910.03,
-    cliques: 1734,
-    landingPage: 1338,
-    leadTelegram: 455,
-    saidaTelegram: 165,
-    cadastros: 69,
-    ftd: 12,
-    valorFtd: 5640,
-    depositos: 47,
-    valorDepositos: 9615,
-    rev10: -276.10,
-    vendas: 462.30,
-  },
-  {
-    id: "3",
-    data: "03/07",
-    investimento: 2937.27,
-    cliques: 1720,
-    landingPage: 1335,
-    leadTelegram: 469,
-    saidaTelegram: 158,
-    cadastros: 87,
-    ftd: 19,
-    valorFtd: 2398,
-    depositos: 34,
-    valorDepositos: 19298,
-    rev10: 2855,
-    vendas: 73.23,
-  },
-];
-
-const initialFinance: FinanceData = {
-  investimento: 185364.74,
-  deposito: 1094961.29,
-  taxa: 32848.84,
-  saque: 260328.60,
-  expert: 8288.33,
-};
-
 const Index = () => {
-  const [data, setData] = useState<DailyData[]>(initialData);
-  const [finance, setFinance] = useState<FinanceData>(initialFinance);
+  const { 
+    data, 
+    setData, 
+    isLoading: isLoadingData, 
+    isSaving: isSavingData,
+    addRow,
+    deleteRow 
+  } = useDailyData();
+  
+  const { 
+    finance, 
+    setFinance, 
+    isLoading: isLoadingFinance 
+  } = useFinanceData();
 
   const totals = useMemo(() => calculateTotals(data), [data]);
   const funnelData = useMemo(() => calculateFunnel(totals), [totals]);
@@ -238,7 +192,14 @@ const Index = () => {
         </div>
 
         {/* Data Table */}
-        <DataTable data={data} onDataChange={setData} />
+        <DataTable 
+          data={data} 
+          onDataChange={setData}
+          onAddRow={addRow}
+          onDeleteRow={deleteRow}
+          isLoading={isLoadingData}
+          isSaving={isSavingData}
+        />
       </div>
     </div>
   );

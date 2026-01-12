@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_data: {
+        Row: {
+          cadastros: number
+          cliques: number
+          created_at: string
+          data: string
+          depositos: number
+          ftd: number
+          id: string
+          investimento: number
+          landing_page: number
+          lead_telegram: number
+          rev10: number
+          saida_telegram: number
+          updated_at: string
+          valor_depositos: number
+          valor_ftd: number
+          vendas: number
+        }
+        Insert: {
+          cadastros?: number
+          cliques?: number
+          created_at?: string
+          data: string
+          depositos?: number
+          ftd?: number
+          id?: string
+          investimento?: number
+          landing_page?: number
+          lead_telegram?: number
+          rev10?: number
+          saida_telegram?: number
+          updated_at?: string
+          valor_depositos?: number
+          valor_ftd?: number
+          vendas?: number
+        }
+        Update: {
+          cadastros?: number
+          cliques?: number
+          created_at?: string
+          data?: string
+          depositos?: number
+          ftd?: number
+          id?: string
+          investimento?: number
+          landing_page?: number
+          lead_telegram?: number
+          rev10?: number
+          saida_telegram?: number
+          updated_at?: string
+          valor_depositos?: number
+          valor_ftd?: number
+          vendas?: number
+        }
+        Relationships: []
+      }
+      finance_data: {
+        Row: {
+          created_at: string
+          deposito: number
+          expert: number
+          id: string
+          investimento: number
+          saque: number
+          taxa: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deposito?: number
+          expert?: number
+          id?: string
+          investimento?: number
+          saque?: number
+          taxa?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deposito?: number
+          expert?: number
+          id?: string
+          investimento?: number
+          saque?: number
+          taxa?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
