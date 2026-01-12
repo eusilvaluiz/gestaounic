@@ -159,7 +159,8 @@ export const DataTable = ({
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.investimento || ""}
                         onChange={(e) => handleCellChange(row.id, "investimento", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -168,7 +169,8 @@ export const DataTable = ({
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.cliques || ""}
                         onChange={(e) => handleCellChange(row.id, "cliques", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -177,7 +179,8 @@ export const DataTable = ({
                     <TableCell>{renderMetricsCell(metrics.cpc, false, true)}</TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.landingPage || ""}
                         onChange={(e) => handleCellChange(row.id, "landingPage", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -187,7 +190,8 @@ export const DataTable = ({
                     <TableCell>{renderMetricsCell(metrics.cliqueLp, true)}</TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.leadTelegram || ""}
                         onChange={(e) => handleCellChange(row.id, "leadTelegram", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -195,7 +199,8 @@ export const DataTable = ({
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.saidaTelegram || ""}
                         onChange={(e) => handleCellChange(row.id, "saidaTelegram", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -206,7 +211,8 @@ export const DataTable = ({
                     <TableCell>{renderMetricsCell(metrics.lpTelegram, true)}</TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.cadastros || ""}
                         onChange={(e) => handleCellChange(row.id, "cadastros", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -216,7 +222,8 @@ export const DataTable = ({
                     <TableCell>{renderMetricsCell(metrics.leadCadastro, true)}</TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.ftd || ""}
                         onChange={(e) => handleCellChange(row.id, "ftd", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -224,7 +231,8 @@ export const DataTable = ({
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.valorFtd || ""}
                         onChange={(e) => handleCellChange(row.id, "valorFtd", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -234,7 +242,8 @@ export const DataTable = ({
                     <TableCell>{renderMetricsCell(metrics.cadastroFtd, true)}</TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.depositos || ""}
                         onChange={(e) => handleCellChange(row.id, "depositos", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -242,7 +251,8 @@ export const DataTable = ({
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.valorDepositos || ""}
                         onChange={(e) => handleCellChange(row.id, "valorDepositos", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -250,7 +260,8 @@ export const DataTable = ({
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.rev10 || ""}
                         onChange={(e) => handleCellChange(row.id, "rev10", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -258,7 +269,8 @@ export const DataTable = ({
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={row.vendas || ""}
                         onChange={(e) => handleCellChange(row.id, "vendas", e.target.value)}
                         className="h-8 text-xs bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
