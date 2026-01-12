@@ -24,52 +24,52 @@ export const FinancePanel = ({ totals }: FinancePanelProps) => {
       </h3>
       
       {/* Valores Automáticos (somente leitura) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
-        <div className="space-y-2 min-w-0">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        <div className="space-y-2">
           <p className="text-xs text-muted-foreground">Investimento</p>
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-destructive flex-shrink-0" />
-            <span className="text-sm font-medium text-destructive truncate">
+            <span className="text-sm font-medium text-destructive">
               {formatCurrency(metrics.investimento)}
             </span>
           </div>
         </div>
         
-        <div className="space-y-2 min-w-0">
+        <div className="space-y-2">
           <p className="text-xs text-muted-foreground">Depósito</p>
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-success flex-shrink-0" />
-            <span className="text-sm font-medium text-success truncate">
+            <span className="text-sm font-medium text-success">
               {formatCurrency(metrics.deposito)}
             </span>
           </div>
         </div>
 
-        <div className="space-y-2 min-w-0">
+        <div className="space-y-2">
           <p className="text-xs text-muted-foreground">Taxa (total)</p>
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2">
             <TrendingDown className="w-4 h-4 text-warning flex-shrink-0" />
-            <span className="text-sm font-medium text-warning truncate">
+            <span className="text-sm font-medium text-warning">
               {formatCurrency(metrics.taxa)}
             </span>
           </div>
         </div>
         
-        <div className="space-y-2 min-w-0">
+        <div className="space-y-2">
           <p className="text-xs text-muted-foreground">Saque (total)</p>
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2">
             <ArrowDownRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            <span className="text-sm font-medium truncate">
+            <span className="text-sm font-medium">
               {formatCurrency(metrics.saque)}
             </span>
           </div>
         </div>
         
-        <div className="space-y-2 min-w-0">
+        <div className="space-y-2">
           <p className="text-xs text-muted-foreground">Expert (total)</p>
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-info flex-shrink-0" />
-            <span className="text-sm font-medium text-info truncate">
+            <span className="text-sm font-medium text-info">
               {formatCurrency(metrics.expert)}
             </span>
           </div>
@@ -77,39 +77,39 @@ export const FinancePanel = ({ totals }: FinancePanelProps) => {
       </div>
       
       {/* Métricas Calculadas */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 pt-4 border-t border-border">
-        <div className="text-center p-3 rounded-lg bg-accent min-w-0">
-          <p className="text-xs text-muted-foreground mb-1 truncate">Custo por FTD</p>
-          <p className="text-sm font-bold text-info truncate">{formatCurrency(metrics.custoFtd)}</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-4 border-t border-border">
+        <div className="text-center p-3 rounded-lg bg-accent">
+          <p className="text-xs text-muted-foreground mb-1">Custo por FTD</p>
+          <p className="text-sm font-bold text-info">{formatCurrency(metrics.custoFtd)}</p>
         </div>
         
-        <div className="text-center p-3 rounded-lg bg-accent min-w-0">
-          <p className="text-xs text-muted-foreground mb-1 truncate">Ticket Médio FTD</p>
-          <p className="text-sm font-bold text-info truncate">{formatCurrency(metrics.ticketMedioFtd)}</p>
+        <div className="text-center p-3 rounded-lg bg-accent">
+          <p className="text-xs text-muted-foreground mb-1">Ticket Médio FTD</p>
+          <p className="text-sm font-bold text-info">{formatCurrency(metrics.ticketMedioFtd)}</p>
         </div>
         
-        <div className="text-center p-3 rounded-lg bg-accent min-w-0">
-          <p className="text-xs text-muted-foreground mb-1 truncate">Ticket Médio Total</p>
-          <p className="text-sm font-bold text-info truncate">{formatCurrency(metrics.ticketMedioTotal)}</p>
+        <div className="text-center p-3 rounded-lg bg-accent">
+          <p className="text-xs text-muted-foreground mb-1">Ticket Médio Total</p>
+          <p className="text-sm font-bold text-info">{formatCurrency(metrics.ticketMedioTotal)}</p>
         </div>
         
-        <div className="text-center p-3 rounded-lg bg-accent min-w-0">
-          <p className="text-xs text-muted-foreground mb-1 truncate">ROI por Depósito</p>
-          <p className={`text-sm font-bold truncate ${metrics.roiDeposito >= 1 ? 'text-success' : 'text-destructive'}`}>
+        <div className="text-center p-3 rounded-lg bg-accent">
+          <p className="text-xs text-muted-foreground mb-1">ROI por Depósito</p>
+          <p className={`text-sm font-bold ${metrics.roiDeposito >= 1 ? 'text-success' : 'text-destructive'}`}>
             {metrics.roiDeposito.toFixed(2)}x
           </p>
         </div>
         
-        <div className="text-center p-3 rounded-lg bg-accent min-w-0">
-          <p className="text-xs text-muted-foreground mb-1 truncate">ROI Operação</p>
-          <p className={`text-sm font-bold truncate ${metrics.roiOperacao >= 1 ? 'text-success' : 'text-destructive'}`}>
+        <div className="text-center p-3 rounded-lg bg-accent">
+          <p className="text-xs text-muted-foreground mb-1">ROI Operação</p>
+          <p className={`text-sm font-bold ${metrics.roiOperacao >= 1 ? 'text-success' : 'text-destructive'}`}>
             {metrics.roiOperacao.toFixed(2)}x
           </p>
         </div>
         
-        <div className="text-center p-3 rounded-lg bg-accent border border-success/30 min-w-0">
-          <p className="text-xs text-muted-foreground mb-1 truncate">Lucro Líquido</p>
-          <p className={`text-sm font-bold truncate ${metrics.lucroLiquido >= 0 ? 'text-success' : 'text-destructive'}`}>
+        <div className="text-center p-3 rounded-lg bg-accent border border-success/30">
+          <p className="text-xs text-muted-foreground mb-1">Lucro Líquido</p>
+          <p className={`text-sm font-bold ${metrics.lucroLiquido >= 0 ? 'text-success' : 'text-destructive'}`}>
             {formatCurrency(metrics.lucroLiquido)}
           </p>
         </div>
