@@ -93,7 +93,7 @@ const SortableRow = ({
         <CurrencyInput
           value={row.investimento}
           onChange={(val) => handleCellChange(row.id, "investimento", val)}
-          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
           placeholder="0,00"
         />
       </TableCell>
@@ -163,7 +163,7 @@ const SortableRow = ({
         <CurrencyInput
           value={row.valorFtd}
           onChange={(val) => handleCellChange(row.id, "valorFtd", val)}
-          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.custoFtd, false, true)}</TableCell>
@@ -181,21 +181,21 @@ const SortableRow = ({
         <CurrencyInput
           value={row.valorDepositos}
           onChange={(val) => handleCellChange(row.id, "valorDepositos", val)}
-          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
       <TableCell>
         <CurrencyInput
           value={row.rev10}
           onChange={(val) => handleCellChange(row.id, "rev10", val)}
-          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
       <TableCell>
         <CurrencyInput
           value={row.vendas}
           onChange={(val) => handleCellChange(row.id, "vendas", val)}
-          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
       <TableCell>
@@ -338,7 +338,7 @@ export const DataTable = ({
               <TableRow className="hover:bg-transparent border-border">
                 <TableHead className="w-10"></TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[90px]">Data</TableHead>
-                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Investimento</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Investimento</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cliques</TableHead>
                 <TableHead className="text-info font-semibold min-w-[100px]">CPC</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[85px]">LP</TableHead>
@@ -353,13 +353,13 @@ export const DataTable = ({
                 <TableHead className="text-info font-semibold min-w-[100px]">Custo Cadastro</TableHead>
                 <TableHead className="text-warning font-semibold min-w-[95px]">Lead→Cadastro</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[85px]">FTD</TableHead>
-                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Valor FTD</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Valor FTD</TableHead>
                 <TableHead className="text-info font-semibold min-w-[100px]">Custo FTD</TableHead>
                 <TableHead className="text-warning font-semibold min-w-[95px]">Cadastro→FTD</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Depósitos</TableHead>
-                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Valor Depósitos</TableHead>
-                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">REV (10%)</TableHead>
-                <TableHead className="text-muted-foreground font-semibold min-w-[110px]">Vendas</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Valor Depósitos</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[145px]">REV (10%)</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Vendas</TableHead>
                 <TableHead className="text-success font-semibold min-w-[75px]">ROI</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
