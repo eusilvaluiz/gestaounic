@@ -1,4 +1,4 @@
-import { DailyData, CalculatedMetrics, TotalsData, FunnelData, FinanceData } from "@/types/marketing";
+import { DailyData, CalculatedMetrics, TotalsData, FunnelData } from "@/types/marketing";
 
 export const calculateMetrics = (data: DailyData): CalculatedMetrics => {
   const safeDivide = (a: number, b: number): number => {
@@ -48,6 +48,9 @@ export const calculateTotals = (dataList: DailyData[]): TotalsData => {
       valorDepositos: acc.valorDepositos + (curr.valorDepositos || 0),
       rev10: acc.rev10 + (curr.rev10 || 0),
       vendas: acc.vendas + (curr.vendas || 0),
+      taxa: acc.taxa + (curr.taxa || 0),
+      saque: acc.saque + (curr.saque || 0),
+      expert: acc.expert + (curr.expert || 0),
     }),
     {
       investimento: 0,
@@ -62,6 +65,9 @@ export const calculateTotals = (dataList: DailyData[]): TotalsData => {
       valorDepositos: 0,
       rev10: 0,
       vendas: 0,
+      taxa: 0,
+      saque: 0,
+      expert: 0,
     }
   );
 };
@@ -103,19 +109,19 @@ export const calculateFunnel = (totals: TotalsData): FunnelData[] => {
   ];
 };
 
-export const calculateFinanceMetrics = (totals: TotalsData, finance: FinanceData) => {
+export const calculateFinanceMetrics = (totals: TotalsData) => {
   // Custo por FTD usando investimento da tabela diária
   const custoFtd = totals.ftd > 0 ? totals.investimento / totals.ftd : 0;
   const ticketMedioFtd = totals.ftd > 0 ? totals.valorFtd / totals.ftd : 0;
   const ticketMedioTotal = totals.ftd > 0 ? totals.valorDepositos / totals.ftd : 0;
   const roiDeposito = totals.investimento > 0 ? totals.valorDepositos / totals.investimento : 0;
   
-  // Lucro Líquido = Depósito - Investimento - Taxa - Saque - Expert (conforme planilha original)
-  const lucroLiquido = totals.valorDepositos - totals.investimento - finance.taxa - finance.saque - finance.expert;
+  // Lucro Líquido = Depósito - Investimento - Taxa - Saque - Expert (agora vem do totals)
+  const lucroLiquido = totals.valorDepositos - totals.investimento - totals.taxa - totals.saque - totals.expert;
   
-  // ROI Operação = (Depósito - Taxa - Saque - Expert) / Investimento (conforme planilha original)
+  // ROI Operação = (Depósito - Taxa - Saque - Expert) / Investimento
   const roiOperacao = totals.investimento > 0 
-    ? (totals.valorDepositos - finance.taxa - finance.saque - finance.expert) / totals.investimento 
+    ? (totals.valorDepositos - totals.taxa - totals.saque - totals.expert) / totals.investimento 
     : 0;
 
   return {
@@ -126,7 +132,10 @@ export const calculateFinanceMetrics = (totals: TotalsData, finance: FinanceData
     lucroLiquido,
     roiOperacao,
     investimento: totals.investimento,
-    deposito: totals.valorDepositos
+    deposito: totals.valorDepositos,
+    taxa: totals.taxa,
+    saque: totals.saque,
+    expert: totals.expert
   };
 };
 

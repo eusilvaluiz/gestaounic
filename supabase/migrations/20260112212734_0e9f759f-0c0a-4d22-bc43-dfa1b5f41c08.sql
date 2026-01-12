@@ -1,0 +1,4 @@
+ALTER TABLE daily_data 
+ADD COLUMN taxa numeric NOT NULL DEFAULT 0,
+ADD COLUMN saque numeric NOT NULL DEFAULT 0,
+ADD COLUMN expert numeric NOT NULL DEFAULT 0;

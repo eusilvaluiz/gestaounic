@@ -199,6 +199,27 @@ const SortableRow = ({
         />
       </TableCell>
       <TableCell>
+        <CurrencyInput
+          value={row.taxa}
+          onChange={(val) => handleCellChange(row.id, "taxa", val)}
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
+        <CurrencyInput
+          value={row.saque}
+          onChange={(val) => handleCellChange(row.id, "saque", val)}
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
+        <CurrencyInput
+          value={row.expert}
+          onChange={(val) => handleCellChange(row.id, "expert", val)}
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+        />
+      </TableCell>
+      <TableCell>
         <span className={`font-mono text-sm font-bold ${metrics.roi >= 1 ? 'text-success' : 'text-destructive'}`}>
           {isFinite(metrics.roi) ? metrics.roi.toFixed(2) : "-"}
         </span>
@@ -273,6 +294,9 @@ export const DataTable = ({
         valorDepositos: 0,
         rev10: 0,
         vendas: 0,
+        taxa: 0,
+        saque: 0,
+        expert: 0,
       };
       onDataChange([...data, newRow]);
     }
@@ -360,6 +384,9 @@ export const DataTable = ({
                 <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Valor Depósitos</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[145px]">REV (10%)</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Vendas</TableHead>
+                <TableHead className="text-warning font-semibold min-w-[100px]">Taxa</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Saque</TableHead>
+                <TableHead className="text-info font-semibold min-w-[100px]">Expert</TableHead>
                 <TableHead className="text-success font-semibold min-w-[75px]">ROI</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
@@ -368,7 +395,7 @@ export const DataTable = ({
               <TableBody>
                 {data.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={26} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={29} className="text-center py-8 text-muted-foreground">
                       Nenhum dado encontrado. Clique em "Nova Linha" para começar.
                     </TableCell>
                   </TableRow>

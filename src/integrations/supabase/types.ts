@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           data: string
           depositos: number
+          expert: number
           ftd: number
           id: string
           investimento: number
@@ -28,7 +29,9 @@ export type Database = {
           lead_telegram: number
           rev10: number
           saida_telegram: number
+          saque: number
           sort_order: number | null
+          taxa: number
           updated_at: string
           valor_depositos: number
           valor_ftd: number
@@ -40,6 +43,7 @@ export type Database = {
           created_at?: string
           data: string
           depositos?: number
+          expert?: number
           ftd?: number
           id?: string
           investimento?: number
@@ -47,7 +51,9 @@ export type Database = {
           lead_telegram?: number
           rev10?: number
           saida_telegram?: number
+          saque?: number
           sort_order?: number | null
+          taxa?: number
           updated_at?: string
           valor_depositos?: number
           valor_ftd?: number
@@ -59,6 +65,7 @@ export type Database = {
           created_at?: string
           data?: string
           depositos?: number
+          expert?: number
           ftd?: number
           id?: string
           investimento?: number
@@ -66,7 +73,9 @@ export type Database = {
           lead_telegram?: number
           rev10?: number
           saida_telegram?: number
+          saque?: number
           sort_order?: number | null
+          taxa?: number
           updated_at?: string
           valor_depositos?: number
           valor_ftd?: number

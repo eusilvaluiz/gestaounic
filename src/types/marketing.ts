@@ -13,6 +13,9 @@ export interface DailyData {
   valorDepositos: number;
   rev10: number;
   vendas: number;
+  taxa: number;
+  saque: number;
+  expert: number;
   sortOrder?: number;
 }
 
@@ -43,6 +46,9 @@ export interface TotalsData {
   valorDepositos: number;
   rev10: number;
   vendas: number;
+  taxa: number;
+  saque: number;
+  expert: number;
 }
 
 export interface FunnelData {

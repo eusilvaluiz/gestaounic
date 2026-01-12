@@ -7,7 +7,6 @@ import { DataTable } from "@/components/DataTable";
 import { FinancePanel } from "@/components/FinancePanel";
 import { DateRangeFilter, DateRangeOption, DateRange, getDateRangeFromOption } from "@/components/DateRangeFilter";
 import { useDailyData } from "@/hooks/useDailyData";
-import { useFinanceData } from "@/hooks/useFinanceData";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { DailyData } from "@/types/marketing";
@@ -64,12 +63,6 @@ const Index = () => {
     deleteRow,
     reorderRows
   } = useDailyData();
-  
-  const { 
-    finance, 
-    setFinance, 
-    isLoading: isLoadingFinance 
-  } = useFinanceData();
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -234,11 +227,7 @@ const Index = () => {
         {/* Funnel and Finance */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FunnelChart data={funnelData} />
-          <FinancePanel 
-            finance={finance} 
-            totals={totals}
-            onFinanceChange={setFinance} 
-          />
+          <FinancePanel totals={totals} />
         </div>
 
         {/* Totals Row */}
