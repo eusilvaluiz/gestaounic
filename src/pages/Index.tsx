@@ -1,14 +1,17 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { calculateTotals, calculateFunnel, formatCurrency, formatNumber, formatPercent } from "@/utils/calculations";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelChart } from "@/components/FunnelChart";
 import { DataTable } from "@/components/DataTable";
 import { FinancePanel } from "@/components/FinancePanel";
+import { DateRangeFilter, DateRangeOption, DateRange, getDateRangeFromOption } from "@/components/DateRangeFilter";
 import { useDailyData } from "@/hooks/useDailyData";
 import { useFinanceData } from "@/hooks/useFinanceData";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { DailyData } from "@/types/marketing";
+import { parse, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { 
   DollarSign, 
   MousePointer, 
@@ -21,9 +24,36 @@ import {
   Loader2
 } from "lucide-react";
 
+// Parse "dd/MM" format to Date (assumes current year)
+const parseDailyDate = (dateStr: string): Date => {
+  const currentYear = new Date().getFullYear();
+  try {
+    // Handle "dd/MM" format
+    const parsed = parse(`${dateStr}/${currentYear}`, "dd/MM/yyyy", new Date());
+    return parsed;
+  } catch {
+    return new Date();
+  }
+};
+
+// Filter data by date range
+const filterDataByDateRange = (data: DailyData[], range: DateRange): DailyData[] => {
+  return data.filter(row => {
+    const rowDate = parseDailyDate(row.data);
+    return isWithinInterval(rowDate, { 
+      start: startOfDay(range.from), 
+      end: endOfDay(range.to) 
+    });
+  });
+};
+
 const Index = () => {
   const { user, isLoading: isAuthLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  
+  // Date filter state
+  const [dateRangeOption, setDateRangeOption] = useState<DateRangeOption>("last7days");
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
 
   const { 
     data, 
@@ -47,8 +77,21 @@ const Index = () => {
     }
   }, [user, isAuthLoading, navigate]);
 
-  const totals = useMemo(() => calculateTotals(data), [data]);
+  // Filter data based on selected date range
+  const filteredData = useMemo(() => {
+    const range = getDateRangeFromOption(dateRangeOption, customDateRange);
+    return filterDataByDateRange(data, range);
+  }, [data, dateRangeOption, customDateRange]);
+
+  const totals = useMemo(() => calculateTotals(filteredData), [filteredData]);
   const funnelData = useMemo(() => calculateFunnel(totals), [totals]);
+
+  const handleDateRangeChange = (option: DateRangeOption, range?: DateRange) => {
+    setDateRangeOption(option);
+    if (option === "custom" && range) {
+      setCustomDateRange(range);
+    }
+  };
 
   const totalMetrics = useMemo(() => {
     const cpcTotal = totals.cliques > 0 ? totals.investimento / totals.cliques : 0;
@@ -114,8 +157,11 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent">
-              <span className="text-sm text-muted-foreground">Período:</span>
-              <span className="font-semibold text-foreground">Julho 2024</span>
+              <DateRangeFilter
+                value={dateRangeOption}
+                customRange={customDateRange}
+                onChange={handleDateRangeChange}
+              />
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent">
               <span className="text-sm text-muted-foreground hidden sm:inline">
