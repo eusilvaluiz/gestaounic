@@ -331,19 +331,20 @@ export const DataTable = ({
     return () => observer.disconnect();
   }, []);
 
-  // Sincronizar scroll horizontal
+  // Sincronizar scroll horizontal - pega o wrapper interno do Table
   useEffect(() => {
-    const container = tableContainerRef.current;
     const floatingHeader = floatingHeaderRef.current;
+    // O Table do shadcn tem um wrapper div com overflow-auto, precisamos encontrá-lo
+    const tableWrapper = tableContainerRef.current?.querySelector('.relative.w-full.overflow-auto') as HTMLElement;
     
-    if (!container || !floatingHeader) return;
+    if (!tableWrapper || !floatingHeader) return;
 
     const handleScroll = () => {
-      floatingHeader.scrollLeft = container.scrollLeft;
+      floatingHeader.scrollLeft = tableWrapper.scrollLeft;
     };
 
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
+    tableWrapper.addEventListener('scroll', handleScroll);
+    return () => tableWrapper.removeEventListener('scroll', handleScroll);
   }, [showFloatingHeader]);
 
   const displayedData = useMemo(() => {
@@ -453,51 +454,53 @@ export const DataTable = ({
       {/* Header Flutuante */}
       {showFloatingHeader && (
         <div 
-          ref={floatingHeaderRef}
-          className="fixed top-0 left-0 right-0 z-50 overflow-hidden bg-[hsl(222,47%,11%)] border-b border-border shadow-lg shadow-black/50"
-          style={{ scrollbarWidth: 'none' }}
+          className="fixed top-0 left-0 right-0 z-50 bg-[hsl(222,47%,11%)] border-b border-border shadow-lg shadow-black/50"
         >
-          <div className="overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent border-border bg-[hsl(222,47%,12%)]">
-                  <TableHead className="w-10"></TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Data</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Investimento</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cliques</TableHead>
-                  <TableHead className="text-info font-semibold min-w-[100px]">CPC</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">LP</TableHead>
-                  <TableHead className="text-info font-semibold min-w-[100px]">CPV</TableHead>
-                  <TableHead className="text-warning font-semibold min-w-[95px]">Clique→LP</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Lead Telegram</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Saída</TableHead>
-                  <TableHead className="text-warning font-semibold min-w-[95px]">Retenção</TableHead>
-                  <TableHead className="text-info font-semibold min-w-[100px]">Custo Lead</TableHead>
-                  <TableHead className="text-warning font-semibold min-w-[95px]">LP→Telegram</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cadastros</TableHead>
-                  <TableHead className="text-info font-semibold min-w-[100px]">Custo Cadastro</TableHead>
-                  <TableHead className="text-warning font-semibold min-w-[95px]">Lead→Cadastro</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">FTD</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Valor FTD</TableHead>
-                  <TableHead className="text-info font-semibold min-w-[100px]">Custo FTD</TableHead>
-                  <TableHead className="text-warning font-semibold min-w-[95px]">Cadastro→FTD</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Depósitos</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Valor Depósitos</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">REV (10%)</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Vendas</TableHead>
-                  <TableHead className="text-warning font-semibold min-w-[100px]">Taxa</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Saque</TableHead>
-                  <TableHead className="text-info font-semibold min-w-[100px]">Expert</TableHead>
-                  <TableHead className="text-success font-semibold min-w-[75px]">ROI</TableHead>
-                  <TableHead className="w-10"></TableHead>
-                </TableRow>
-              </TableHeader>
-            </Table>
+          <div 
+            ref={floatingHeaderRef}
+            className="overflow-x-auto"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
+          >
+            <table className="w-full caption-bottom text-sm">
+              <thead className="[&_tr]:border-b">
+                <tr className="border-b transition-colors hover:bg-transparent bg-[hsl(222,47%,12%)]">
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground w-10"></th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[100px]">Data</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">Investimento</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">Cliques</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">CPC</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">LP</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">CPV</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">Clique→LP</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[100px]">Lead Telegram</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">Saída</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">Retenção</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">Custo Lead</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">LP→Telegram</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">Cadastros</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">Custo Cadastro</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">Lead→Cadastro</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">FTD</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">Valor FTD</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">Custo FTD</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">Cadastro→FTD</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">Depósitos</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">Valor Depósitos</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">REV (10%)</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">Vendas</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[100px]">Taxa</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[100px]">Saque</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">Expert</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-success min-w-[75px]">ROI</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground w-10"></th>
+                </tr>
+              </thead>
+            </table>
           </div>
         </div>
       )}
       
-      <div ref={tableContainerRef} className="overflow-x-auto">
+      <div ref={tableContainerRef} className="overflow-x-auto [&>div]:overflow-visible">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
