@@ -1,6 +1,7 @@
 import { DailyData, CalculatedMetrics } from "@/types/marketing";
 import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
 import { CurrencyInput } from "@/components/CurrencyInput";
+import { NumberInput } from "@/components/NumberInput";
 import { Trash2, Plus, Loader2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,41 +99,33 @@ const SortableRow = ({
         />
       </TableCell>
       <TableCell>
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={row.cliques || ""}
-          onChange={(e) => handleCellChange(row.id, "cliques", e.target.value)}
+        <NumberInput
+          value={row.cliques}
+          onChange={(val) => handleCellChange(row.id, "cliques", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.cpc, false, true)}</TableCell>
       <TableCell>
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={row.landingPage || ""}
-          onChange={(e) => handleCellChange(row.id, "landingPage", e.target.value)}
+        <NumberInput
+          value={row.landingPage}
+          onChange={(val) => handleCellChange(row.id, "landingPage", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.cpv, false, true)}</TableCell>
       <TableCell>{renderMetricsCell(metrics.cliqueLp, true)}</TableCell>
       <TableCell>
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={row.leadTelegram || ""}
-          onChange={(e) => handleCellChange(row.id, "leadTelegram", e.target.value)}
+        <NumberInput
+          value={row.leadTelegram}
+          onChange={(val) => handleCellChange(row.id, "leadTelegram", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
       <TableCell>
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={row.saidaTelegram || ""}
-          onChange={(e) => handleCellChange(row.id, "saidaTelegram", e.target.value)}
+        <NumberInput
+          value={row.saidaTelegram}
+          onChange={(val) => handleCellChange(row.id, "saidaTelegram", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
@@ -140,22 +133,18 @@ const SortableRow = ({
       <TableCell>{renderMetricsCell(metrics.custoLead, false, true)}</TableCell>
       <TableCell>{renderMetricsCell(metrics.lpTelegram, true)}</TableCell>
       <TableCell>
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={row.cadastros || ""}
-          onChange={(e) => handleCellChange(row.id, "cadastros", e.target.value)}
+        <NumberInput
+          value={row.cadastros}
+          onChange={(val) => handleCellChange(row.id, "cadastros", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.custoCadastro, false, true)}</TableCell>
       <TableCell>{renderMetricsCell(metrics.leadCadastro, true)}</TableCell>
       <TableCell>
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={row.ftd || ""}
-          onChange={(e) => handleCellChange(row.id, "ftd", e.target.value)}
+        <NumberInput
+          value={row.ftd}
+          onChange={(val) => handleCellChange(row.id, "ftd", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
@@ -169,11 +158,9 @@ const SortableRow = ({
       <TableCell>{renderMetricsCell(metrics.custoFtd, false, true)}</TableCell>
       <TableCell>{renderMetricsCell(metrics.cadastroFtd, true)}</TableCell>
       <TableCell>
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={row.depositos || ""}
-          onChange={(e) => handleCellChange(row.id, "depositos", e.target.value)}
+        <NumberInput
+          value={row.depositos}
+          onChange={(val) => handleCellChange(row.id, "depositos", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </TableCell>
