@@ -305,6 +305,7 @@ export const DataTable = ({
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const [headerPosition, setHeaderPosition] = useState({ left: 0, width: 0 });
   
   const headerRef = useRef<HTMLTableSectionElement>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -402,6 +403,25 @@ export const DataTable = ({
       tableWrapper.addEventListener('scroll', handleScroll);
       return () => tableWrapper.removeEventListener('scroll', handleScroll);
     }
+  }, []);
+
+  // Atualizar posição do header flutuante
+  useEffect(() => {
+    const updatePosition = () => {
+      if (tableContainerRef.current) {
+        const rect = tableContainerRef.current.getBoundingClientRect();
+        setHeaderPosition({ left: rect.left, width: rect.width });
+      }
+    };
+    
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    updatePosition();
+    
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
   }, []);
 
   const displayedData = useMemo(() => {
@@ -511,15 +531,19 @@ export const DataTable = ({
       {/* Header Flutuante com larguras sincronizadas */}
       {showFloatingHeader && columnWidths.length > 0 && (
         <div 
-          className="fixed top-0 left-0 right-0 z-50 bg-[hsl(222,47%,11%)] border-b border-border shadow-lg shadow-black/50 overflow-hidden"
+          className="fixed top-0 z-50 bg-[hsl(222,47%,11%)] border-b border-border shadow-lg shadow-black/50 overflow-hidden"
+          style={{
+            left: headerPosition.left,
+            width: headerPosition.width
+          }}
         >
           <div 
-            className="overflow-hidden"
             style={{ 
-              transform: `translateX(-${scrollLeft}px)`,
+              marginLeft: -scrollLeft,
+              width: columnWidths.reduce((a, b) => a + b, 0)
             }}
           >
-            <table className="w-full text-sm" style={{ tableLayout: 'fixed', width: columnWidths.reduce((a, b) => a + b, 0) }}>
+            <table className="text-sm" style={{ tableLayout: 'fixed', width: columnWidths.reduce((a, b) => a + b, 0) }}>
               <thead>
                 <tr className="bg-[hsl(222,47%,12%)] border-b">
                   {columnDefs.map((col, index) => (
