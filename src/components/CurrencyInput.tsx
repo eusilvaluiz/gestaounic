@@ -23,7 +23,7 @@ export const CurrencyInput = ({ value, onChange, className, placeholder }: Curre
   const handleFocus = () => {
     setIsFocused(true);
     // Ao focar, mostra valor sem formatação para facilitar edição
-    if (value) {
+    if (value !== 0) {
       setDisplayValue(String(value).replace(".", ","));
     } else {
       setDisplayValue("");
@@ -39,8 +39,8 @@ export const CurrencyInput = ({ value, onChange, className, placeholder }: Curre
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Permite apenas números, vírgula e ponto
-    const raw = e.target.value.replace(/[^\d.,]/g, "");
+    // Permite apenas números, vírgula, ponto e sinal de menos
+    const raw = e.target.value.replace(/[^\d.,-]/g, "");
     setDisplayValue(raw);
   };
 
