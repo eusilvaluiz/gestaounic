@@ -288,7 +288,7 @@ const Index = () => {
 
         {/* Data Table */}
         <DataTable 
-          data={data} 
+          data={filteredData} 
           onDataChange={setData}
           onAddRow={addRow}
           onDeleteRow={deleteRow}
