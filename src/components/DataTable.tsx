@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { DailyData, CalculatedMetrics } from "@/types/marketing";
 import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
 import { CurrencyInput } from "@/components/CurrencyInput";
@@ -13,6 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DndContext,
   closestCenter,
@@ -235,12 +243,22 @@ export const DataTable = ({
   isLoading = false,
   isSaving = false 
 }: DataTableProps) => {
+  const [rowLimit, setRowLimit] = useState<number | "unlimited">(20);
+  
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const displayedData = useMemo(() => {
+    if (rowLimit === "unlimited" || data.length <= 20) {
+      return data;
+    }
+    // Pega as últimas N linhas (mais recentes)
+    return data.slice(-rowLimit);
+  }, [data, rowLimit]);
 
   const handleCellChange = (id: string, field: keyof DailyData, value: string | number) => {
     const updatedData = data.map((row) => {
@@ -378,7 +396,7 @@ export const DataTable = ({
                 <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
-            <SortableContext items={data.map(d => d.id)} strategy={verticalListSortingStrategy}>
+            <SortableContext items={displayedData.map(d => d.id)} strategy={verticalListSortingStrategy}>
               <TableBody>
                 {data.length === 0 ? (
                   <TableRow>
@@ -387,7 +405,7 @@ export const DataTable = ({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  data.map((row) => {
+                  displayedData.map((row) => {
                     const metrics: CalculatedMetrics = calculateMetrics(row);
                     
                     return (
@@ -408,6 +426,29 @@ export const DataTable = ({
           </Table>
         </DndContext>
       </div>
+      
+      {data.length > 20 && (
+        <div className="p-4 border-t border-border flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <span>Exibindo</span>
+          <Select 
+            value={rowLimit.toString()} 
+            onValueChange={(val) => setRowLimit(val === "unlimited" ? "unlimited" : Number(val))}
+          >
+            <SelectTrigger className="w-[100px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+              <SelectItem value="250">250</SelectItem>
+              <SelectItem value="500">500</SelectItem>
+              <SelectItem value="unlimited">Todas</SelectItem>
+            </SelectContent>
+          </Select>
+          <span>de {data.length} linhas</span>
+        </div>
+      )}
     </div>
   );
 };
