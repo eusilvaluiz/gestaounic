@@ -86,7 +86,7 @@ const SortableRow = ({
         <Input
           value={row.data}
           onChange={(e) => handleCellChange(row.id, "data", e.target.value)}
-          className="h-8 text-xs min-w-[75px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
           placeholder="dd/mm/aa"
         />
       </TableCell>
@@ -348,7 +348,7 @@ export const DataTable = ({
             <TableHeader>
               <TableRow className="hover:bg-transparent border-border">
                 <TableHead className="w-10"></TableHead>
-                <TableHead className="text-muted-foreground font-semibold min-w-[90px]">Data</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Data</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Investimento</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cliques</TableHead>
                 <TableHead className="text-info font-semibold min-w-[100px]">CPC</TableHead>
