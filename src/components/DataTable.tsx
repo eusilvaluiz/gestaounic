@@ -3,9 +3,12 @@ import { DailyData, CalculatedMetrics } from "@/types/marketing";
 import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { NumberInput } from "@/components/NumberInput";
-import { Trash2, Plus, Loader2, GripVertical } from "lucide-react";
+import { Trash2, Plus, Loader2, GripVertical, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, parse, isValid } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   Table,
   TableBody,
@@ -37,6 +40,62 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+// DatePicker cell component for date selection
+const DatePickerCell = ({ 
+  value, 
+  onChange 
+}: { 
+  value: string; 
+  onChange: (date: string) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  
+  // Parse date from "dd/MM/yy" format
+  const parseDate = (dateStr: string): Date | undefined => {
+    if (!dateStr) return undefined;
+    
+    // Try different formats
+    const formats = ["dd/MM/yy", "dd/MM/yyyy", "dd/MM"];
+    for (const fmt of formats) {
+      const parsed = parse(dateStr, fmt, new Date());
+      if (isValid(parsed)) return parsed;
+    }
+    return undefined;
+  };
+
+  const selectedDate = parseDate(value);
+
+  const handleSelect = (date: Date | undefined) => {
+    if (date) {
+      onChange(format(date, "dd/MM/yy"));
+      setOpen(false);
+    }
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          className="h-8 text-xs min-w-[90px] justify-start font-normal px-2 hover:bg-accent"
+        >
+          <CalendarIcon className="mr-1 h-3 w-3 text-muted-foreground" />
+          {value || <span className="text-muted-foreground">Selecionar</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={handleSelect}
+          locale={ptBR}
+          initialFocus
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 interface DataTableProps {
   data: DailyData[];
@@ -91,11 +150,9 @@ const SortableRow = ({
         <GripVertical className="w-4 h-4 text-muted-foreground" />
       </TableCell>
       <TableCell>
-        <Input
+        <DatePickerCell
           value={row.data}
-          onChange={(e) => handleCellChange(row.id, "data", e.target.value)}
-          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-          placeholder="dd/mm/aa"
+          onChange={(newDate) => handleCellChange(row.id, "data", newDate)}
         />
       </TableCell>
       <TableCell>

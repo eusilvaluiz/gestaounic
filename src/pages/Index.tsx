@@ -187,17 +187,12 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex flex-col items-end gap-1">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent">
-                <DateRangeFilter
-                  value={dateRangeOption}
-                  customRange={customDateRange}
-                  onChange={handleDateRangeChange}
-                />
-              </div>
-              <span className="text-[10px] text-muted-foreground">
-                Filtro afeta apenas KPIs e gráficos
-              </span>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent">
+              <DateRangeFilter
+                value={dateRangeOption}
+                customRange={customDateRange}
+                onChange={handleDateRangeChange}
+              />
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent">
               <span className="text-sm text-muted-foreground hidden sm:inline">
@@ -319,9 +314,9 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Data Table - sempre mostra TODOS os dados, sem filtro */}
+        {/* Data Table */}
         <DataTable 
-          data={data} 
+          data={filteredData}
           onDataChange={setData}
           onAddRow={addRow}
           onDeleteRow={deleteRow}
