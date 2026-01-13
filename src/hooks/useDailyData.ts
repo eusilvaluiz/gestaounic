@@ -263,24 +263,24 @@ export const useDailyData = () => {
     }
   }, [data, toast, fetchData]);
 
-  // Helper function to sort data by date
-  const sortByDate = useCallback((rows: DailyData[]): DailyData[] => {
-    return [...rows].sort((a, b) => {
-      const parseDate = (dateStr: string): Date => {
-        const formats = ["dd/MM/yy", "dd/MM/yyyy"];
-        for (const fmt of formats) {
-          const parsed = parse(dateStr, fmt, new Date());
-          if (isValid(parsed)) return parsed;
-        }
-        return new Date(0); // Invalid date goes to the beginning
-      };
-      return parseDate(a.data).getTime() - parseDate(b.data).getTime();
-    });
-  }, []);
-
   // Update local state and save to database
   const updateData = useCallback((newData: DailyData[]) => {
     const oldData = data;
+    
+    // Helper function to sort data by date
+    const sortByDate = (rows: DailyData[]): DailyData[] => {
+      return [...rows].sort((a, b) => {
+        const parseDate = (dateStr: string): Date => {
+          const formats = ["dd/MM/yy", "dd/MM/yyyy"];
+          for (const fmt of formats) {
+            const parsed = parse(dateStr, fmt, new Date());
+            if (isValid(parsed)) return parsed;
+          }
+          return new Date(0); // Invalid date goes to the beginning
+        };
+        return parseDate(a.data).getTime() - parseDate(b.data).getTime();
+      });
+    };
     
     // Check if any date was changed
     const dateChanged = newData.some(row => {
@@ -307,7 +307,7 @@ export const useDailyData = () => {
         saveRow(row);
       }
     });
-  }, [data, saveRow, sortByDate]);
+  }, [data, saveRow]);
 
   useEffect(() => {
     fetchData();
