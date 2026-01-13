@@ -45,7 +45,7 @@ export const NumberInput = ({ value, onChange, className, placeholder }: NumberI
       onChange={handleChange}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      className={className}
+      className={`${className} ${value === 0 && !isFocused ? 'text-muted-foreground' : ''}`}
       placeholder={placeholder}
     />
   );
