@@ -303,10 +303,12 @@ export const DataTable = ({
   // Padrão: mostrar todas as linhas (sem limite)
   const [rowLimit, setRowLimit] = useState<number | "unlimited">("unlimited");
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);
+  const [columnWidths, setColumnWidths] = useState<number[]>([]);
+  const [scrollLeft, setScrollLeft] = useState(0);
   
   const headerRef = useRef<HTMLTableSectionElement>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const floatingHeaderRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement | null>(null);
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -314,6 +316,39 @@ export const DataTable = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Definições das colunas para reutilização
+  const columnDefs = useMemo(() => [
+    { key: 'drag', label: '', colorClass: 'text-muted-foreground', width: 'w-10' },
+    { key: 'data', label: 'Data', colorClass: 'text-muted-foreground', minWidth: 'min-w-[100px]' },
+    { key: 'investimento', label: 'Investimento', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
+    { key: 'cliques', label: 'Cliques', colorClass: 'text-muted-foreground', minWidth: 'min-w-[85px]' },
+    { key: 'cpc', label: 'CPC', colorClass: 'text-info', minWidth: 'min-w-[100px]' },
+    { key: 'lp', label: 'LP', colorClass: 'text-muted-foreground', minWidth: 'min-w-[85px]' },
+    { key: 'cpv', label: 'CPV', colorClass: 'text-info', minWidth: 'min-w-[100px]' },
+    { key: 'cliqueLp', label: 'Clique→LP', colorClass: 'text-warning', minWidth: 'min-w-[95px]' },
+    { key: 'leadTelegram', label: 'Lead Telegram', colorClass: 'text-muted-foreground', minWidth: 'min-w-[100px]' },
+    { key: 'saida', label: 'Saída', colorClass: 'text-muted-foreground', minWidth: 'min-w-[85px]' },
+    { key: 'retencao', label: 'Retenção', colorClass: 'text-warning', minWidth: 'min-w-[95px]' },
+    { key: 'custoLead', label: 'Custo Lead', colorClass: 'text-info', minWidth: 'min-w-[100px]' },
+    { key: 'lpTelegram', label: 'LP→Telegram', colorClass: 'text-warning', minWidth: 'min-w-[95px]' },
+    { key: 'cadastros', label: 'Cadastros', colorClass: 'text-muted-foreground', minWidth: 'min-w-[85px]' },
+    { key: 'custoCadastro', label: 'Custo Cadastro', colorClass: 'text-info', minWidth: 'min-w-[100px]' },
+    { key: 'leadCadastro', label: 'Lead→Cadastro', colorClass: 'text-warning', minWidth: 'min-w-[95px]' },
+    { key: 'ftd', label: 'FTD', colorClass: 'text-muted-foreground', minWidth: 'min-w-[85px]' },
+    { key: 'valorFtd', label: 'Valor FTD', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
+    { key: 'custoFtd', label: 'Custo FTD', colorClass: 'text-info', minWidth: 'min-w-[100px]' },
+    { key: 'cadastroFtd', label: 'Cadastro→FTD', colorClass: 'text-warning', minWidth: 'min-w-[95px]' },
+    { key: 'depositos', label: 'Depósitos', colorClass: 'text-muted-foreground', minWidth: 'min-w-[85px]' },
+    { key: 'valorDepositos', label: 'Valor Depósitos', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
+    { key: 'rev10', label: 'REV (10%)', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
+    { key: 'vendas', label: 'Vendas', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
+    { key: 'taxa', label: 'Taxa', colorClass: 'text-warning', minWidth: 'min-w-[100px]' },
+    { key: 'saque', label: 'Saque', colorClass: 'text-muted-foreground', minWidth: 'min-w-[100px]' },
+    { key: 'expert', label: 'Expert', colorClass: 'text-info', minWidth: 'min-w-[100px]' },
+    { key: 'roi', label: 'ROI', colorClass: 'text-success', minWidth: 'min-w-[75px]' },
+    { key: 'delete', label: '', colorClass: 'text-muted-foreground', width: 'w-10' },
+  ], []);
 
   // Detectar quando o header original sai da tela
   useEffect(() => {
@@ -331,21 +366,43 @@ export const DataTable = ({
     return () => observer.disconnect();
   }, []);
 
-  // Sincronizar scroll horizontal - pega o wrapper interno do Table
+  // Medir larguras reais das colunas do header original
   useEffect(() => {
-    const floatingHeader = floatingHeaderRef.current;
-    // O Table do shadcn tem um wrapper div com overflow-auto, precisamos encontrá-lo
-    const tableWrapper = tableContainerRef.current?.querySelector('.relative.w-full.overflow-auto') as HTMLElement;
-    
-    if (!tableWrapper || !floatingHeader) return;
-
-    const handleScroll = () => {
-      floatingHeader.scrollLeft = tableWrapper.scrollLeft;
+    const measureWidths = () => {
+      if (!headerRef.current) return;
+      
+      const headerCells = headerRef.current.querySelectorAll('th');
+      const widths = Array.from(headerCells).map(cell => cell.getBoundingClientRect().width);
+      setColumnWidths(widths);
     };
+    
+    // Medir após um pequeno delay para garantir que o layout foi calculado
+    const timeoutId = setTimeout(measureWidths, 100);
+    
+    // Atualizar quando a janela redimensionar
+    window.addEventListener('resize', measureWidths);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', measureWidths);
+    };
+  }, [data]);
 
-    tableWrapper.addEventListener('scroll', handleScroll);
-    return () => tableWrapper.removeEventListener('scroll', handleScroll);
-  }, [showFloatingHeader]);
+  // Capturar referência do scroll container e sincronizar scroll
+  useEffect(() => {
+    // O Table do shadcn envolve o <table> em um div com overflow-auto
+    const tableWrapper = tableContainerRef.current?.querySelector('.relative.w-full.overflow-auto') as HTMLDivElement | null;
+    if (tableWrapper) {
+      tableScrollRef.current = tableWrapper;
+      
+      const handleScroll = () => {
+        setScrollLeft(tableWrapper.scrollLeft);
+      };
+      
+      tableWrapper.addEventListener('scroll', handleScroll);
+      return () => tableWrapper.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   const displayedData = useMemo(() => {
     if (rowLimit === "unlimited" || data.length <= 20) {
@@ -451,48 +508,29 @@ export const DataTable = ({
           Nova Linha
         </Button>
       </div>
-      {/* Header Flutuante */}
-      {showFloatingHeader && (
+      {/* Header Flutuante com larguras sincronizadas */}
+      {showFloatingHeader && columnWidths.length > 0 && (
         <div 
-          className="fixed top-0 left-0 right-0 z-50 bg-[hsl(222,47%,11%)] border-b border-border shadow-lg shadow-black/50"
+          className="fixed top-0 left-0 right-0 z-50 bg-[hsl(222,47%,11%)] border-b border-border shadow-lg shadow-black/50 overflow-hidden"
         >
           <div 
-            ref={floatingHeaderRef}
-            className="overflow-x-auto"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
+            className="overflow-hidden"
+            style={{ 
+              transform: `translateX(-${scrollLeft}px)`,
+            }}
           >
-            <table className="w-full caption-bottom text-sm">
-              <thead className="[&_tr]:border-b">
-                <tr className="border-b transition-colors hover:bg-transparent bg-[hsl(222,47%,12%)]">
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground w-10"></th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[100px]">Data</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">Investimento</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">Cliques</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">CPC</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">LP</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">CPV</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">Clique→LP</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[100px]">Lead Telegram</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">Saída</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">Retenção</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">Custo Lead</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">LP→Telegram</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">Cadastros</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">Custo Cadastro</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">Lead→Cadastro</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">FTD</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">Valor FTD</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">Custo FTD</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[95px]">Cadastro→FTD</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[85px]">Depósitos</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">Valor Depósitos</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">REV (10%)</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[145px]">Vendas</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-warning min-w-[100px]">Taxa</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground min-w-[100px]">Saque</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-info min-w-[100px]">Expert</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-success min-w-[75px]">ROI</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-muted-foreground w-10"></th>
+            <table className="w-full text-sm" style={{ tableLayout: 'fixed', width: columnWidths.reduce((a, b) => a + b, 0) }}>
+              <thead>
+                <tr className="bg-[hsl(222,47%,12%)] border-b">
+                  {columnDefs.map((col, index) => (
+                    <th 
+                      key={col.key}
+                      style={{ width: columnWidths[index] }}
+                      className={`h-12 px-4 text-left align-middle font-semibold ${col.colorClass}`}
+                    >
+                      {col.label}
+                    </th>
+                  ))}
                 </tr>
               </thead>
             </table>
@@ -500,7 +538,7 @@ export const DataTable = ({
         </div>
       )}
       
-      <div ref={tableContainerRef} className="overflow-x-auto [&>div]:overflow-visible">
+      <div ref={tableContainerRef} className="overflow-x-auto">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
