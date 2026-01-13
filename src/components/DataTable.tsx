@@ -115,6 +115,8 @@ interface SortableRowProps {
   handleDeleteRow: (id: string) => void;
   renderMetricsCell: (value: number, isPercent?: boolean, isCurrency?: boolean) => JSX.Element;
   isSaving: boolean;
+  isSelected: boolean;
+  onRowClick: (id: string) => void;
 }
 
 const SortableRow = ({
@@ -124,6 +126,8 @@ const SortableRow = ({
   handleDeleteRow,
   renderMetricsCell,
   isSaving,
+  isSelected,
+  onRowClick,
 }: SortableRowProps) => {
   const {
     attributes,
@@ -141,7 +145,14 @@ const SortableRow = ({
   };
 
   return (
-    <TableRow ref={setNodeRef} style={style} className="border-border hover:bg-accent/50">
+    <TableRow 
+      ref={setNodeRef} 
+      style={style} 
+      onClick={() => onRowClick(row.id)}
+      className={`border-border hover:bg-accent/50 cursor-pointer transition-all ${
+        isSelected ? 'ring-2 ring-primary ring-inset bg-primary/5' : ''
+      }`}
+    >
       <TableCell
         {...attributes}
         {...listeners}
@@ -306,6 +317,7 @@ export const DataTable = ({
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [headerPosition, setHeaderPosition] = useState({ left: 0, width: 0 });
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [isTableActive, setIsTableActive] = useState(false);
   
   const headerRef = useRef<HTMLTableSectionElement>(null);
@@ -652,6 +664,8 @@ export const DataTable = ({
                         handleDeleteRow={handleDeleteRow}
                         renderMetricsCell={renderMetricsCell}
                         isSaving={isSaving}
+                        isSelected={selectedRowId === row.id}
+                        onRowClick={(id) => setSelectedRowId(id)}
                       />
                     );
                   })
