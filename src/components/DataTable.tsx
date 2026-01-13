@@ -215,7 +215,7 @@ const SortableRow = ({
         />
       </TableCell>
       <TableCell>
-        <span className={`font-mono text-sm font-bold ${metrics.roi >= 1 ? 'text-success' : 'text-destructive'}`}>
+        <span className={`font-mono text-sm font-bold ${metrics.roi >= 0 ? 'text-success' : 'text-destructive'}`}>
           {isFinite(metrics.roi) ? metrics.roi.toFixed(2) : "-"}
         </span>
       </TableCell>
