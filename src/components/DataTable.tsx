@@ -306,6 +306,7 @@ export const DataTable = ({
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [headerPosition, setHeaderPosition] = useState({ left: 0, width: 0 });
+  const [isTableActive, setIsTableActive] = useState(false);
   
   const headerRef = useRef<HTMLTableSectionElement>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -405,12 +406,21 @@ export const DataTable = ({
     }
   }, []);
 
-  // Atualizar posição do header flutuante
+  // Atualizar posição do header flutuante e verificar se a tabela está ativa
   useEffect(() => {
+    const HEADER_HEIGHT = 48; // Altura do header (h-12 = 48px)
+    
     const updatePosition = () => {
       if (tableContainerRef.current) {
         const rect = tableContainerRef.current.getBoundingClientRect();
         setHeaderPosition({ left: rect.left, width: rect.width });
+        
+        // A tabela está "ativa" quando:
+        // 1. O topo da tabela já passou do topo da viewport (rect.top <= 2)
+        // 2. O fundo da tabela ainda está visível (rect.bottom > HEADER_HEIGHT)
+        // Margem de 2px para evitar flickering no limiar
+        const active = rect.top <= 2 && rect.bottom > HEADER_HEIGHT + 2;
+        setIsTableActive(active);
       }
     };
     
@@ -529,7 +539,7 @@ export const DataTable = ({
         </Button>
       </div>
       {/* Header Flutuante com larguras sincronizadas */}
-      {showFloatingHeader && columnWidths.length > 0 && (
+      {showFloatingHeader && isTableActive && columnWidths.length > 0 && (
         <div 
           className="fixed top-0 z-50 bg-[hsl(222,47%,11%)] border-b border-border shadow-lg shadow-black/50 overflow-hidden"
           style={{
