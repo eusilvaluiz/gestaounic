@@ -26,7 +26,7 @@ export const CurrencyInput = ({ value, onChange, className, placeholder }: Curre
     if (value !== 0) {
       setDisplayValue(String(value).replace(".", ","));
     } else {
-      setDisplayValue("");
+      setDisplayValue("0");
     }
   };
 

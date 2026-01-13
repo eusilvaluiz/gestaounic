@@ -16,7 +16,7 @@ export const calculateMetrics = (data: DailyData): CalculatedMetrics => {
   const leadCadastro = safeDivide(data.cadastros, data.leadTelegram) * 100;
   const custoFtd = safeDivide(data.investimento, data.ftd);
   const cadastroFtd = safeDivide(data.ftd, data.cadastros) * 100;
-  const roi = safeDivide(data.valorDepositos, data.investimento);
+  const roi = safeDivide(data.valorDepositos - data.investimento, data.investimento);
 
   return {
     cpc,
@@ -114,7 +114,9 @@ export const calculateFinanceMetrics = (totals: TotalsData) => {
   const custoFtd = totals.ftd > 0 ? totals.investimento / totals.ftd : 0;
   const ticketMedioFtd = totals.ftd > 0 ? totals.valorFtd / totals.ftd : 0;
   const ticketMedioTotal = totals.ftd > 0 ? totals.valorDepositos / totals.ftd : 0;
-  const roiDeposito = totals.investimento > 0 ? totals.valorDepositos / totals.investimento : 0;
+  const roiDeposito = totals.investimento > 0 
+    ? (totals.valorDepositos - totals.investimento) / totals.investimento 
+    : 0;
   
   // Lucro Líquido = Depósito - Investimento - Taxa - Saque - Expert (agora vem do totals)
   const lucroLiquido = totals.valorDepositos - totals.investimento - totals.taxa - totals.saque - totals.expert;
@@ -159,7 +161,8 @@ export const formatNumber = (value: number): string => {
 
 // Formata número para exibição em input no padrão brasileiro (sem símbolo R$)
 export const formatCurrencyInput = (value: number): string => {
-  if (value === 0 || value === undefined || value === null) return "";
+  if (value === undefined || value === null) return "";
+  if (value === 0) return "0,00";
   return new Intl.NumberFormat('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
