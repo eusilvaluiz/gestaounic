@@ -23,12 +23,23 @@ import {
   Loader2
 } from "lucide-react";
 
+// Verifica se a string de data está completa (dd/MM/yy ou dd/MM/yyyy)
+const isCompleteDateString = (dateStr: string): boolean => {
+  if (!dateStr || dateStr.trim() === '') return false;
+  // Aceita dd/MM/yy ou dd/MM/yyyy
+  return /^\d{2}\/\d{2}\/(\d{2}|\d{4})$/.test(dateStr.trim());
+};
+
 // Parse date format - supports "dd/MM/yy", "dd/MM/yyyy" and legacy "dd/MM"
 const parseDailyDate = (dateStr: string): Date => {
   try {
     const parts = dateStr.split('/');
     if (parts.length === 3) {
       const yearPart = parts[2];
+      // Só aceita ano com exatamente 2 ou 4 dígitos
+      if (yearPart.length !== 2 && yearPart.length !== 4) {
+        return new Date(NaN); // Invalid Date
+      }
       // Short year format: "dd/MM/yy"
       if (yearPart.length === 2) {
         return parse(dateStr, "dd/MM/yy", new Date());
@@ -37,24 +48,28 @@ const parseDailyDate = (dateStr: string): Date => {
       return parse(dateStr, "dd/MM/yyyy", new Date());
     }
     // Legacy format: "dd/MM" (assume current year)
-    const currentYear = new Date().getFullYear();
-    return parse(`${dateStr}/${currentYear}`, "dd/MM/yyyy", new Date());
+    if (parts.length === 2 && /^\d{2}$/.test(parts[0]) && /^\d{2}$/.test(parts[1])) {
+      const currentYear = new Date().getFullYear();
+      return parse(`${dateStr}/${currentYear}`, "dd/MM/yyyy", new Date());
+    }
+    return new Date(NaN); // Invalid Date para formatos não reconhecidos
   } catch {
-    return new Date();
+    return new Date(NaN);
   }
 };
 
 // Filter data by date range
 const filterDataByDateRange = (data: DailyData[], range: DateRange): DailyData[] => {
   return data.filter(row => {
-    // Se a data está vazia ou incompleta, sempre mostrar a linha (está sendo editada)
-    if (!row.data || row.data.trim() === '' || row.data.split('/').length < 3) {
+    // Se a data não está completa (vazia, parcial, formato errado), sempre mostrar
+    // Isso evita que a linha suma durante a edição
+    if (!isCompleteDateString(row.data)) {
       return true;
     }
     
     try {
       const rowDate = parseDailyDate(row.data);
-      // Se a data é inválida, mostrar a linha (está sendo editada)
+      // Se a data é inválida, mostrar a linha
       if (isNaN(rowDate.getTime())) {
         return true;
       }
@@ -63,7 +78,6 @@ const filterDataByDateRange = (data: DailyData[], range: DateRange): DailyData[]
         end: endOfDay(range.to) 
       });
     } catch {
-      // Se houver erro ao parsear, mostrar a linha
       return true;
     }
   });
