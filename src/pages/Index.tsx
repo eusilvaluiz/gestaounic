@@ -23,12 +23,17 @@ import {
   Loader2
 } from "lucide-react";
 
-// Parse date format - supports both "dd/MM/yyyy" and legacy "dd/MM"
+// Parse date format - supports "dd/MM/yy", "dd/MM/yyyy" and legacy "dd/MM"
 const parseDailyDate = (dateStr: string): Date => {
   try {
     const parts = dateStr.split('/');
-    // Full format: "dd/MM/yyyy"
     if (parts.length === 3) {
+      const yearPart = parts[2];
+      // Short year format: "dd/MM/yy"
+      if (yearPart.length === 2) {
+        return parse(dateStr, "dd/MM/yy", new Date());
+      }
+      // Full year format: "dd/MM/yyyy"
       return parse(dateStr, "dd/MM/yyyy", new Date());
     }
     // Legacy format: "dd/MM" (assume current year)

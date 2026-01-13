@@ -131,7 +131,7 @@ export const useDailyData = () => {
         : 0;
 
       const newRow = {
-        data: new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+        data: new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" }),
         investimento: 0,
         cliques: 0,
         landing_page: 0,
