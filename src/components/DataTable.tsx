@@ -243,7 +243,8 @@ export const DataTable = ({
   isLoading = false,
   isSaving = false 
 }: DataTableProps) => {
-  const [rowLimit, setRowLimit] = useState<number | "unlimited">(20);
+  // Padrão: mostrar todas as linhas (sem limite)
+  const [rowLimit, setRowLimit] = useState<number | "unlimited">("unlimited");
   
   const sensors = useSensors(
     useSensor(PointerSensor),
