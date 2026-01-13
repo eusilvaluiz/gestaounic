@@ -47,11 +47,25 @@ const parseDailyDate = (dateStr: string): Date => {
 // Filter data by date range
 const filterDataByDateRange = (data: DailyData[], range: DateRange): DailyData[] => {
   return data.filter(row => {
-    const rowDate = parseDailyDate(row.data);
-    return isWithinInterval(rowDate, { 
-      start: startOfDay(range.from), 
-      end: endOfDay(range.to) 
-    });
+    // Se a data está vazia ou incompleta, sempre mostrar a linha (está sendo editada)
+    if (!row.data || row.data.trim() === '' || row.data.split('/').length < 3) {
+      return true;
+    }
+    
+    try {
+      const rowDate = parseDailyDate(row.data);
+      // Se a data é inválida, mostrar a linha (está sendo editada)
+      if (isNaN(rowDate.getTime())) {
+        return true;
+      }
+      return isWithinInterval(rowDate, { 
+        start: startOfDay(range.from), 
+        end: endOfDay(range.to) 
+      });
+    } catch {
+      // Se houver erro ao parsear, mostrar a linha
+      return true;
+    }
   });
 };
 
