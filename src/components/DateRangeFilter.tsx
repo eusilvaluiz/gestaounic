@@ -23,6 +23,7 @@ export type DateRangeOption =
   | "last7days" 
   | "last14days" 
   | "last30days" 
+  | "maximum"
   | "custom";
 
 export interface DateRange {
@@ -42,6 +43,7 @@ const filterOptions: { value: DateRangeOption; label: string }[] = [
   { value: "last7days", label: "Últimos 7 dias" },
   { value: "last14days", label: "Últimos 14 dias" },
   { value: "last30days", label: "Últimos 30 dias" },
+  { value: "maximum", label: "Máximo" },
   { value: "custom", label: "Personalizado" },
 ];
 
@@ -63,6 +65,8 @@ export const getDateRangeFromOption = (
       return { from: startOfDay(subDays(today, 13)), to: endOfDay(today) };
     case "last30days":
       return { from: startOfDay(subDays(today, 29)), to: endOfDay(today) };
+    case "maximum":
+      return { from: startOfDay(new Date(2000, 0, 1)), to: endOfDay(today) };
     case "custom":
       return customRange || { from: startOfDay(subDays(today, 6)), to: endOfDay(today) };
     default:
