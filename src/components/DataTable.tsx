@@ -421,8 +421,8 @@ export const DataTable = ({
           onDragEnd={handleDragEnd}
         >
           <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent border-border">
+            <TableHeader className="sticky top-0 z-20 bg-[hsl(222,47%,12%)]">
+              <TableRow className="hover:bg-transparent border-border bg-[hsl(222,47%,12%)]">
                 <TableHead className="w-10"></TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Data</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Investimento</TableHead>
