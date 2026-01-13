@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { DailyData, CalculatedMetrics } from "@/types/marketing";
 import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
 import { CurrencyInput } from "@/components/CurrencyInput";
@@ -302,6 +302,11 @@ export const DataTable = ({
 }: DataTableProps) => {
   // Padrão: mostrar todas as linhas (sem limite)
   const [rowLimit, setRowLimit] = useState<number | "unlimited">("unlimited");
+  const [showFloatingHeader, setShowFloatingHeader] = useState(false);
+  
+  const headerRef = useRef<HTMLTableSectionElement>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const floatingHeaderRef = useRef<HTMLDivElement>(null);
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -309,6 +314,37 @@ export const DataTable = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Detectar quando o header original sai da tela
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowFloatingHeader(!entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: '-1px 0px 0px 0px' }
+    );
+
+    if (headerRef.current) {
+      observer.observe(headerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Sincronizar scroll horizontal
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    const floatingHeader = floatingHeaderRef.current;
+    
+    if (!container || !floatingHeader) return;
+
+    const handleScroll = () => {
+      floatingHeader.scrollLeft = container.scrollLeft;
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [showFloatingHeader]);
 
   const displayedData = useMemo(() => {
     if (rowLimit === "unlimited" || data.length <= 20) {
@@ -414,14 +450,61 @@ export const DataTable = ({
           Nova Linha
         </Button>
       </div>
-      <div className="overflow-x-auto">
+      {/* Header Flutuante */}
+      {showFloatingHeader && (
+        <div 
+          ref={floatingHeaderRef}
+          className="fixed top-0 left-0 right-0 z-50 overflow-hidden bg-[hsl(222,47%,11%)] border-b border-border shadow-lg shadow-black/50"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          <div className="overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent border-border bg-[hsl(222,47%,12%)]">
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Data</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Investimento</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cliques</TableHead>
+                  <TableHead className="text-info font-semibold min-w-[100px]">CPC</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">LP</TableHead>
+                  <TableHead className="text-info font-semibold min-w-[100px]">CPV</TableHead>
+                  <TableHead className="text-warning font-semibold min-w-[95px]">Clique→LP</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Lead Telegram</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Saída</TableHead>
+                  <TableHead className="text-warning font-semibold min-w-[95px]">Retenção</TableHead>
+                  <TableHead className="text-info font-semibold min-w-[100px]">Custo Lead</TableHead>
+                  <TableHead className="text-warning font-semibold min-w-[95px]">LP→Telegram</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cadastros</TableHead>
+                  <TableHead className="text-info font-semibold min-w-[100px]">Custo Cadastro</TableHead>
+                  <TableHead className="text-warning font-semibold min-w-[95px]">Lead→Cadastro</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">FTD</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Valor FTD</TableHead>
+                  <TableHead className="text-info font-semibold min-w-[100px]">Custo FTD</TableHead>
+                  <TableHead className="text-warning font-semibold min-w-[95px]">Cadastro→FTD</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Depósitos</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Valor Depósitos</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">REV (10%)</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Vendas</TableHead>
+                  <TableHead className="text-warning font-semibold min-w-[100px]">Taxa</TableHead>
+                  <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Saque</TableHead>
+                  <TableHead className="text-info font-semibold min-w-[100px]">Expert</TableHead>
+                  <TableHead className="text-success font-semibold min-w-[75px]">ROI</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+            </Table>
+          </div>
+        </div>
+      )}
+      
+      <div ref={tableContainerRef} className="overflow-x-auto">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
           <Table>
-            <TableHeader className="sticky top-0 z-20 bg-[hsl(222,47%,12%)]">
+            <TableHeader ref={headerRef}>
               <TableRow className="hover:bg-transparent border-border bg-[hsl(222,47%,12%)]">
                 <TableHead className="w-10"></TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Data</TableHead>
