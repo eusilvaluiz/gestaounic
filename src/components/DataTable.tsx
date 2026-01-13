@@ -352,46 +352,20 @@ export const DataTable = ({
     { key: 'delete', label: '', colorClass: 'text-muted-foreground', width: 'w-10' },
   ], []);
 
-  // Detectar quando o header original sai da tela
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowFloatingHeader(!entry.isIntersecting);
-      },
-      { threshold: 0, rootMargin: '-1px 0px 0px 0px' }
-    );
-
-    if (headerRef.current) {
-      observer.observe(headerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
   // Medir larguras reais das colunas do header original
-  useEffect(() => {
-    const measureWidths = () => {
-      if (!headerRef.current) return;
-      
-      const headerCells = headerRef.current.querySelectorAll('th');
-      const widths = Array.from(headerCells).map(cell => cell.getBoundingClientRect().width);
-      setColumnWidths(widths);
-    };
+  const measureWidths = () => {
+    if (!headerRef.current) return;
     
-    // Medir após um pequeno delay para garantir que o layout foi calculado
-    const timeoutId = setTimeout(measureWidths, 100);
-    
-    // Atualizar quando a janela redimensionar
-    window.addEventListener('resize', measureWidths);
-    
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', measureWidths);
-    };
-  }, [data]);
+    const headerCells = headerRef.current.querySelectorAll('th');
+    const widths = Array.from(headerCells).map(cell => cell.getBoundingClientRect().width);
+    setColumnWidths(widths);
+  };
 
   // Capturar referência do scroll container e sincronizar scroll
   useEffect(() => {
+    // Não rodar durante loading, refs não existem ainda
+    if (isLoading) return;
+    
     // O Table do shadcn envolve o <table> em um div com overflow-auto
     const tableWrapper = tableContainerRef.current?.querySelector('.relative.w-full.overflow-auto') as HTMLDivElement | null;
     if (tableWrapper) {
@@ -404,24 +378,34 @@ export const DataTable = ({
       tableWrapper.addEventListener('scroll', handleScroll);
       return () => tableWrapper.removeEventListener('scroll', handleScroll);
     }
-  }, []);
+  }, [isLoading]);
 
-  // Atualizar posição do header flutuante e verificar se a tabela está ativa
+  // Atualizar posição do header flutuante, verificar se a tabela está ativa e detectar floating header
   useEffect(() => {
+    // Não rodar durante loading, refs não existem ainda
+    if (isLoading) return;
+    
     const HEADER_HEIGHT = 48; // Altura do header (h-12 = 48px)
     let rafId: number;
     
     const updatePosition = () => {
-      if (tableContainerRef.current) {
-        const rect = tableContainerRef.current.getBoundingClientRect();
-        setHeaderPosition({ left: rect.left, width: rect.width });
+      if (tableContainerRef.current && headerRef.current) {
+        const containerRect = tableContainerRef.current.getBoundingClientRect();
+        setHeaderPosition({ left: containerRect.left, width: containerRect.width });
         
         // A tabela está "ativa" quando:
         // 1. O topo da tabela já passou do topo da viewport (rect.top <= 10)
         // 2. O fundo da tabela ainda está visível (rect.bottom > HEADER_HEIGHT + 10)
-        // Margem de 10px para tolerância entre navegadores
-        const active = rect.top <= 10 && rect.bottom > HEADER_HEIGHT + 10;
+        const active = containerRect.top <= 10 && containerRect.bottom > HEADER_HEIGHT + 10;
         setIsTableActive(active);
+        
+        // Detectar quando o header original sai da tela usando getBoundingClientRect
+        const headerRect = headerRef.current.getBoundingClientRect();
+        const shouldFloat = headerRect.bottom <= 0;
+        setShowFloatingHeader(shouldFloat);
+        
+        // Medir larguras das colunas
+        measureWidths();
       }
     };
     
@@ -453,16 +437,21 @@ export const DataTable = ({
     
     // Garantir atualização após renderização completa
     const timeoutId = setTimeout(updatePosition, 100);
+    // Segunda tentativa para garantir medições corretas
+    const timeoutId2 = setTimeout(updatePosition, 300);
     
     return () => {
       cancelAnimationFrame(rafId);
       clearTimeout(timeoutId);
+      clearTimeout(timeoutId2);
       window.removeEventListener('scroll', onScroll, { capture: true });
       window.removeEventListener('resize', onScroll);
       document.removeEventListener('scroll', onScroll, { capture: true });
       scrollableParents.forEach(p => p.removeEventListener('scroll', onScroll));
     };
-  }, []);
+  }, [isLoading, data]);
+
+  // displayedData continua igual
 
   const displayedData = useMemo(() => {
     if (rowLimit === "unlimited" || data.length <= 20) {
