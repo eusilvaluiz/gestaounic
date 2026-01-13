@@ -602,6 +602,22 @@ export const DataTable = ({
           </div>
         </div>
       )}
+
+      {/* Botão Flutuante (FAB) para adicionar nova linha */}
+      {showFloatingHeader && isTableActive && (
+        <button
+          onClick={handleAddRow}
+          disabled={isSaving}
+          className="fixed bottom-6 right-6 z-50 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg shadow-primary/25 transition-all duration-300 ease-out flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed animate-in fade-in slide-in-from-bottom-4"
+          style={{ 
+            width: '48px',
+            height: '48px' 
+          }}
+          title="Adicionar nova linha"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
       
       <div ref={tableContainerRef} className="overflow-x-auto">
         <DndContext
