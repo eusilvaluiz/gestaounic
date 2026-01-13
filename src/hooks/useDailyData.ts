@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DailyData } from "@/types/marketing";
 import { useToast } from "@/hooks/use-toast";
+import { parse, isValid } from "date-fns";
 
 interface DbDailyData {
   id: string;
@@ -262,19 +263,51 @@ export const useDailyData = () => {
     }
   }, [data, toast, fetchData]);
 
+  // Helper function to sort data by date
+  const sortByDate = useCallback((rows: DailyData[]): DailyData[] => {
+    return [...rows].sort((a, b) => {
+      const parseDate = (dateStr: string): Date => {
+        const formats = ["dd/MM/yy", "dd/MM/yyyy"];
+        for (const fmt of formats) {
+          const parsed = parse(dateStr, fmt, new Date());
+          if (isValid(parsed)) return parsed;
+        }
+        return new Date(0); // Invalid date goes to the beginning
+      };
+      return parseDate(a.data).getTime() - parseDate(b.data).getTime();
+    });
+  }, []);
+
   // Update local state and save to database
   const updateData = useCallback((newData: DailyData[]) => {
     const oldData = data;
-    setData(newData);
     
-    // Find changed rows and save them
-    newData.forEach(row => {
+    // Check if any date was changed
+    const dateChanged = newData.some(row => {
+      const oldRow = oldData.find(r => r.id === row.id);
+      return oldRow && oldRow.data !== row.data;
+    });
+    
+    // If date changed, reorder by date
+    let finalData = newData;
+    if (dateChanged) {
+      const sorted = sortByDate(newData);
+      finalData = sorted.map((row, index) => ({
+        ...row,
+        sortOrder: index + 1,
+      }));
+    }
+    
+    setData(finalData);
+    
+    // Save changed rows
+    finalData.forEach(row => {
       const oldRow = oldData.find(r => r.id === row.id);
       if (!oldRow || JSON.stringify(oldRow) !== JSON.stringify(row)) {
         saveRow(row);
       }
     });
-  }, [data, saveRow]);
+  }, [data, saveRow, sortByDate]);
 
   useEffect(() => {
     fetchData();
