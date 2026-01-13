@@ -86,8 +86,8 @@ const SortableRow = ({
         <Input
           value={row.data}
           onChange={(e) => handleCellChange(row.id, "data", e.target.value)}
-          className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
-          placeholder="dd/mm"
+          className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          placeholder="dd/mm/aaaa"
         />
       </TableCell>
       <TableCell>
