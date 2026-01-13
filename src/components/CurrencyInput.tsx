@@ -52,7 +52,7 @@ export const CurrencyInput = ({ value, onChange, className, placeholder }: Curre
       onChange={handleChange}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      className={className}
+      className={`${className} ${value === 0 && !isFocused ? 'text-muted-foreground' : ''}`}
       placeholder={placeholder}
     />
   );
