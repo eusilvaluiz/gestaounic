@@ -332,7 +332,7 @@ export const DataTable = ({
 
   if (isLoading) {
     return (
-      <div className="bg-card rounded-xl p-8 flex items-center justify-center shadow-xl shadow-black/20 border border-border/50">
+      <div className="bg-[hsl(222,47%,12%)] rounded-xl p-8 flex items-center justify-center shadow-2xl shadow-black/40 border border-border">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
         <span className="ml-3 text-muted-foreground">Carregando dados...</span>
       </div>
@@ -340,7 +340,7 @@ export const DataTable = ({
   }
 
   return (
-    <div className="bg-card rounded-xl overflow-hidden animate-fade-in shadow-xl shadow-black/20 border border-border/50">
+    <div className="bg-[hsl(222,47%,12%)] rounded-xl overflow-hidden animate-fade-in shadow-2xl shadow-black/40 border border-border">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-semibold text-foreground">Dados Diários</h3>
