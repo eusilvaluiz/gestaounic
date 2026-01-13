@@ -409,6 +409,7 @@ export const DataTable = ({
   // Atualizar posição do header flutuante e verificar se a tabela está ativa
   useEffect(() => {
     const HEADER_HEIGHT = 48; // Altura do header (h-12 = 48px)
+    let rafId: number;
     
     const updatePosition = () => {
       if (tableContainerRef.current) {
@@ -416,21 +417,50 @@ export const DataTable = ({
         setHeaderPosition({ left: rect.left, width: rect.width });
         
         // A tabela está "ativa" quando:
-        // 1. O topo da tabela já passou do topo da viewport (rect.top <= 2)
-        // 2. O fundo da tabela ainda está visível (rect.bottom > HEADER_HEIGHT)
-        // Margem de 2px para evitar flickering no limiar
-        const active = rect.top <= 2 && rect.bottom > HEADER_HEIGHT + 2;
+        // 1. O topo da tabela já passou do topo da viewport (rect.top <= 10)
+        // 2. O fundo da tabela ainda está visível (rect.bottom > HEADER_HEIGHT + 10)
+        // Margem de 10px para tolerância entre navegadores
+        const active = rect.top <= 10 && rect.bottom > HEADER_HEIGHT + 10;
         setIsTableActive(active);
       }
     };
     
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updatePosition);
+    };
+    
+    // Listeners no window
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    document.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    
+    // Encontrar containers scrolláveis pais e adicionar listeners
+    const scrollableParents: HTMLElement[] = [];
+    let parent = tableContainerRef.current?.parentElement;
+    while (parent) {
+      const style = window.getComputedStyle(parent);
+      if (style.overflow === 'auto' || style.overflow === 'scroll' || 
+          style.overflowY === 'auto' || style.overflowY === 'scroll') {
+        scrollableParents.push(parent);
+        parent.addEventListener('scroll', onScroll, { passive: true });
+      }
+      parent = parent.parentElement;
+    }
+    
+    // Atualização inicial
     updatePosition();
     
+    // Garantir atualização após renderização completa
+    const timeoutId = setTimeout(updatePosition, 100);
+    
     return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
+      cancelAnimationFrame(rafId);
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', onScroll, { capture: true });
+      window.removeEventListener('resize', onScroll);
+      document.removeEventListener('scroll', onScroll, { capture: true });
+      scrollableParents.forEach(p => p.removeEventListener('scroll', onScroll));
     };
   }, []);
 
