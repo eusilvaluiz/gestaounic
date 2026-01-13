@@ -159,7 +159,7 @@ export const formatNumber = (value: number): string => {
 
 // Formata número para exibição em input no padrão brasileiro (sem símbolo R$)
 export const formatCurrencyInput = (value: number): string => {
-  if (!value || value === 0) return "";
+  if (value === 0 || value === undefined || value === null) return "";
   return new Intl.NumberFormat('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
