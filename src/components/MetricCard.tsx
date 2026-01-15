@@ -51,7 +51,7 @@ export const MetricCard = ({
         <div className="space-y-1 min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className={cn(
-            "text-2xl font-bold tracking-tight truncate",
+            "text-lg lg:text-xl xl:text-2xl font-bold tracking-tight",
             variant === "success" && "gradient-text-success",
             variant === "danger" && "gradient-text-danger",
             variant === "info" && "gradient-text-info",
