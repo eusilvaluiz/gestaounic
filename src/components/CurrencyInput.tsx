@@ -55,7 +55,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className={`${className} ${value === 0 && !isFocused ? 'text-muted-foreground' : ''} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+        className={`${className} ${value === 0 && !isFocused ? 'text-muted-foreground' : ''} ${disabled ? 'cursor-not-allowed opacity-90' : ''}`}
         placeholder={placeholder}
         disabled={disabled}
       />
