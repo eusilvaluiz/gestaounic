@@ -3,7 +3,10 @@ import { DailyData, CalculatedMetrics } from "@/types/marketing";
 import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { NumberInput } from "@/components/NumberInput";
-import { Trash2, Plus, Loader2, GripVertical, CalendarIcon } from "lucide-react";
+import { Trash2, Plus, Loader2, GripVertical, CalendarIcon, Lock, LockOpen } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -44,10 +47,12 @@ import { CSS } from "@dnd-kit/utilities";
 // DatePicker cell component for date selection
 const DatePickerCell = ({ 
   value, 
-  onChange 
+  onChange,
+  disabled = false
 }: { 
   value: string; 
   onChange: (date: string) => void;
+  disabled?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   
@@ -74,11 +79,12 @@ const DatePickerCell = ({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={disabled ? false : open} onOpenChange={disabled ? undefined : setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="h-8 text-xs min-w-[90px] justify-start font-normal px-2 hover:bg-accent"
+          className={`h-8 text-xs min-w-[90px] justify-start font-normal px-2 hover:bg-accent ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+          disabled={disabled}
         >
           <CalendarIcon className="mr-1 h-3 w-3 text-muted-foreground" />
           {value || <span className="text-muted-foreground">Selecionar</span>}
@@ -117,6 +123,7 @@ interface SortableRowProps {
   isSaving: boolean;
   isSelected: boolean;
   onRowClick: (id: string) => void;
+  isEditingEnabled: boolean;
 }
 
 const SortableRow = ({
@@ -128,6 +135,7 @@ const SortableRow = ({
   isSaving,
   isSelected,
   onRowClick,
+  isEditingEnabled,
 }: SortableRowProps) => {
   const {
     attributes,
@@ -136,7 +144,7 @@ const SortableRow = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: row.id });
+  } = useSortable({ id: row.id, disabled: !isEditingEnabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -151,19 +159,20 @@ const SortableRow = ({
       onClick={() => onRowClick(row.id)}
       className={`border-border hover:bg-accent/50 cursor-pointer transition-all ${
         isSelected ? 'ring-2 ring-primary ring-inset bg-primary/5' : ''
-      }`}
+      } ${!isEditingEnabled ? 'opacity-75' : ''}`}
     >
       <TableCell
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing w-10"
+        {...(isEditingEnabled ? attributes : {})}
+        {...(isEditingEnabled ? listeners : {})}
+        className={`w-10 ${isEditingEnabled ? 'cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'}`}
       >
-        <GripVertical className="w-4 h-4 text-muted-foreground" />
+        <GripVertical className={`w-4 h-4 ${isEditingEnabled ? 'text-muted-foreground' : 'text-muted-foreground/50'}`} />
       </TableCell>
       <TableCell>
         <DatePickerCell
           value={row.data}
           onChange={(newDate) => handleCellChange(row.id, "data", newDate)}
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -172,6 +181,7 @@ const SortableRow = ({
           onChange={(val) => handleCellChange(row.id, "investimento", val)}
           className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
           placeholder="0,00"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -179,6 +189,7 @@ const SortableRow = ({
           value={row.cliques}
           onChange={(val) => handleCellChange(row.id, "cliques", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.cpc, false, true)}</TableCell>
@@ -187,6 +198,7 @@ const SortableRow = ({
           value={row.landingPage}
           onChange={(val) => handleCellChange(row.id, "landingPage", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.cpv, false, true)}</TableCell>
@@ -196,6 +208,7 @@ const SortableRow = ({
           value={row.leadTelegram}
           onChange={(val) => handleCellChange(row.id, "leadTelegram", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -203,6 +216,7 @@ const SortableRow = ({
           value={row.saidaTelegram}
           onChange={(val) => handleCellChange(row.id, "saidaTelegram", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.retencaoTelegram, true)}</TableCell>
@@ -213,6 +227,7 @@ const SortableRow = ({
           value={row.cadastros}
           onChange={(val) => handleCellChange(row.id, "cadastros", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.custoCadastro, false, true)}</TableCell>
@@ -222,6 +237,7 @@ const SortableRow = ({
           value={row.ftd}
           onChange={(val) => handleCellChange(row.id, "ftd", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -229,6 +245,7 @@ const SortableRow = ({
           value={row.valorFtd}
           onChange={(val) => handleCellChange(row.id, "valorFtd", val)}
           className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.custoFtd, false, true)}</TableCell>
@@ -238,6 +255,7 @@ const SortableRow = ({
           value={row.depositos}
           onChange={(val) => handleCellChange(row.id, "depositos", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -245,6 +263,7 @@ const SortableRow = ({
           value={row.valorDepositos}
           onChange={(val) => handleCellChange(row.id, "valorDepositos", val)}
           className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -252,6 +271,7 @@ const SortableRow = ({
           value={row.rev10}
           onChange={(val) => handleCellChange(row.id, "rev10", val)}
           className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -259,6 +279,7 @@ const SortableRow = ({
           value={row.vendas}
           onChange={(val) => handleCellChange(row.id, "vendas", val)}
           className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -266,6 +287,7 @@ const SortableRow = ({
           value={row.taxa}
           onChange={(val) => handleCellChange(row.id, "taxa", val)}
           className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -273,6 +295,7 @@ const SortableRow = ({
           value={row.saque}
           onChange={(val) => handleCellChange(row.id, "saque", val)}
           className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -280,6 +303,7 @@ const SortableRow = ({
           value={row.expert}
           onChange={(val) => handleCellChange(row.id, "expert", val)}
           className="h-8 text-xs min-w-[90px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={!isEditingEnabled}
         />
       </TableCell>
       <TableCell>
@@ -293,7 +317,7 @@ const SortableRow = ({
           size="icon"
           onClick={() => handleDeleteRow(row.id)}
           className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          disabled={isSaving}
+          disabled={isSaving || !isEditingEnabled}
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -314,6 +338,10 @@ export const DataTable = ({
   // Padrão: mostrar todas as linhas (sem limite)
   const [rowLimit, setRowLimit] = useState<number | "unlimited">("unlimited");
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);
+  
+  // Estado do modo de edição
+  const [isEditingEnabled, setIsEditingEnabled] = useState(false);
+  const [lastEditTime, setLastEditTime] = useState<number>(Date.now());
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [headerPosition, setHeaderPosition] = useState({ left: 0, width: 0 });
@@ -473,7 +501,29 @@ export const DataTable = ({
     return data.slice(-rowLimit);
   }, [data, rowLimit]);
 
+  // Auto-desabilitar edição após 5 minutos de inatividade
+  useEffect(() => {
+    if (!isEditingEnabled) return;
+    
+    const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutos
+    
+    const checkInactivity = () => {
+      if (Date.now() - lastEditTime > INACTIVITY_TIMEOUT) {
+        setIsEditingEnabled(false);
+        toast.info("Edição desativada por inatividade", {
+          description: "Ative novamente para continuar editando"
+        });
+      }
+    };
+    
+    const intervalId = setInterval(checkInactivity, 30000); // Verifica a cada 30s
+    
+    return () => clearInterval(intervalId);
+  }, [isEditingEnabled, lastEditTime]);
+
   const handleCellChange = (id: string, field: keyof DailyData, value: string | number) => {
+    setLastEditTime(Date.now()); // Reseta timer de inatividade
+    
     const updatedData = data.map((row) => {
       if (row.id === id) {
         let numValue: string | number;
@@ -494,6 +544,10 @@ export const DataTable = ({
   };
 
   const handleAddRow = async () => {
+    // Habilita edição automaticamente ao adicionar linha
+    setIsEditingEnabled(true);
+    setLastEditTime(Date.now());
+    
     if (onAddRow) {
       await onAddRow();
     } else {
@@ -564,10 +618,31 @@ export const DataTable = ({
             </div>
           )}
         </div>
-        <Button onClick={handleAddRow} size="sm" className="gap-2" disabled={isSaving}>
-          <Plus className="w-4 h-4" />
-          Nova Linha
-        </Button>
+        <div className="flex items-center gap-4">
+          {/* Toggle de edição */}
+          <div className="flex items-center gap-2">
+            {isEditingEnabled ? (
+              <LockOpen className="w-4 h-4 text-primary" />
+            ) : (
+              <Lock className="w-4 h-4 text-muted-foreground" />
+            )}
+            <Switch
+              checked={isEditingEnabled}
+              onCheckedChange={(checked) => {
+                setIsEditingEnabled(checked);
+                if (checked) setLastEditTime(Date.now());
+              }}
+            />
+            <Label className="text-sm text-muted-foreground">
+              {isEditingEnabled ? "Editando" : "Bloqueado"}
+            </Label>
+          </div>
+          
+          <Button onClick={handleAddRow} size="sm" className="gap-2" disabled={isSaving}>
+            <Plus className="w-4 h-4" />
+            Nova Linha
+          </Button>
+        </div>
       </div>
       {/* Header Flutuante com larguras sincronizadas */}
       {showFloatingHeader && isTableActive && columnWidths.length > 0 && (
@@ -682,6 +757,7 @@ export const DataTable = ({
                         isSaving={isSaving}
                         isSelected={selectedRowId === row.id}
                         onRowClick={(id) => setSelectedRowId(id)}
+                        isEditingEnabled={isEditingEnabled}
                       />
                     );
                   })

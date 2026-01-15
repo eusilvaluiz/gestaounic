@@ -7,10 +7,11 @@ interface CurrencyInputProps {
   onChange: (value: number) => void;
   className?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
-  ({ value, onChange, className, placeholder }, ref) => {
+  ({ value, onChange, className, placeholder, disabled }, ref) => {
     const [displayValue, setDisplayValue] = useState("");
     const [isFocused, setIsFocused] = useState(false);
 
@@ -54,8 +55,9 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className={`${className} ${value === 0 && !isFocused ? 'text-muted-foreground' : ''}`}
+        className={`${className} ${value === 0 && !isFocused ? 'text-muted-foreground' : ''} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
         placeholder={placeholder}
+        disabled={disabled}
       />
     );
   }
