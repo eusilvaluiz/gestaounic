@@ -83,7 +83,7 @@ const DatePickerCell = ({
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className={`h-8 text-xs min-w-[90px] justify-start font-normal px-2 hover:bg-accent ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+          className={`h-8 text-xs min-w-[90px] justify-start font-normal px-2 hover:bg-accent ${disabled ? 'cursor-not-allowed opacity-90' : ''}`}
           disabled={disabled}
         >
           <CalendarIcon className="mr-1 h-3 w-3 text-muted-foreground" />
@@ -159,14 +159,14 @@ const SortableRow = ({
       onClick={() => onRowClick(row.id)}
       className={`border-border hover:bg-accent/50 cursor-pointer transition-all ${
         isSelected ? 'ring-2 ring-primary ring-inset bg-primary/5' : ''
-      } ${!isEditingEnabled ? 'opacity-75' : ''}`}
+      } ${!isEditingEnabled ? 'opacity-95' : ''}`}
     >
       <TableCell
         {...(isEditingEnabled ? attributes : {})}
         {...(isEditingEnabled ? listeners : {})}
         className={`w-10 ${isEditingEnabled ? 'cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'}`}
       >
-        <GripVertical className={`w-4 h-4 ${isEditingEnabled ? 'text-muted-foreground' : 'text-muted-foreground/50'}`} />
+        <GripVertical className={`w-4 h-4 ${isEditingEnabled ? 'text-muted-foreground' : 'text-muted-foreground/70'}`} />
       </TableCell>
       <TableCell>
         <DatePickerCell
