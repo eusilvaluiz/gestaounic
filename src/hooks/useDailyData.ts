@@ -264,7 +264,7 @@ export const useDailyData = () => {
   }, [data, toast, fetchData]);
 
   // Update local state and save to database
-  const updateData = useCallback((newData: DailyData[]) => {
+  const updateData = useCallback(async (newData: DailyData[]) => {
     const oldData = data;
     
     // Helper function to sort data by date
@@ -288,7 +288,7 @@ export const useDailyData = () => {
       return oldRow && oldRow.data !== row.data;
     });
     
-    // If date changed, reorder by date
+    // If date changed, reorder by date and save ALL sort_orders to database
     let finalData = newData;
     if (dateChanged) {
       const sorted = sortByDate(newData);
@@ -296,18 +296,50 @@ export const useDailyData = () => {
         ...row,
         sortOrder: index + 1,
       }));
-    }
-    
-    setData(finalData);
-    
-    // Save changed rows
-    finalData.forEach(row => {
-      const oldRow = oldData.find(r => r.id === row.id);
-      if (!oldRow || JSON.stringify(oldRow) !== JSON.stringify(row)) {
-        saveRow(row);
+      
+      setData(finalData);
+      
+      // Save ALL sort_orders to database to keep them unique and sequential
+      try {
+        setIsSaving(true);
+        for (const row of finalData) {
+          const { error } = await supabase
+            .from("daily_data")
+            .update({ sort_order: row.sortOrder })
+            .eq("id", row.id);
+          if (error) throw error;
+        }
+        
+        // Also save the row that was actually modified (other fields)
+        const modifiedRow = finalData.find(row => {
+          const oldRow = oldData.find(r => r.id === row.id);
+          return oldRow && oldRow.data !== row.data;
+        });
+        if (modifiedRow) {
+          await saveRow(modifiedRow);
+        }
+      } catch (error) {
+        console.error("Error saving sort order:", error);
+        toast({
+          title: "Erro ao reordenar",
+          description: "Não foi possível salvar a nova ordem.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSaving(false);
       }
-    });
-  }, [data, saveRow]);
+    } else {
+      setData(finalData);
+      
+      // Save only changed rows (no date change, so no reordering needed)
+      finalData.forEach(row => {
+        const oldRow = oldData.find(r => r.id === row.id);
+        if (!oldRow || JSON.stringify(oldRow) !== JSON.stringify(row)) {
+          saveRow(row);
+        }
+      });
+    }
+  }, [data, saveRow, toast]);
 
   useEffect(() => {
     fetchData();
