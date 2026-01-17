@@ -108,10 +108,30 @@ const Index = () => {
     }
   }, [user, isAuthLoading, navigate]);
 
-  // Filter data based on selected date range
+  // Filter data based on selected date range and always sort by date client-side
   const filteredData = useMemo(() => {
     const range = getDateRangeFromOption(dateRangeOption, customDateRange);
-    return filterDataByDateRange(data, range);
+    const filtered = filterDataByDateRange(data, range);
+    
+    // Always sort by date client-side to ensure consistent display
+    return [...filtered].sort((a, b) => {
+      const parseDate = (dateStr: string): Date => {
+        try {
+          return parseDailyDate(dateStr);
+        } catch {
+          return new Date(0);
+        }
+      };
+      const dateA = parseDate(a.data);
+      const dateB = parseDate(b.data);
+      // If dates are invalid, fall back to sort_order
+      if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) {
+        return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+      }
+      if (isNaN(dateA.getTime())) return 1;
+      if (isNaN(dateB.getTime())) return -1;
+      return dateA.getTime() - dateB.getTime();
+    });
   }, [data, dateRangeOption, customDateRange]);
 
   const totals = useMemo(() => calculateTotals(filteredData), [filteredData]);

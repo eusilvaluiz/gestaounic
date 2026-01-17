@@ -122,14 +122,20 @@ export const useDailyData = () => {
     }
   }, [toast]);
 
-  // Add new row
+  // Add new row - fetch max sort_order directly from DB to avoid stale state
   const addRow = useCallback(async (): Promise<DailyData | null> => {
     try {
       setIsSaving(true);
-      // Get max sort_order to place new row at the end
-      const maxSortOrder = data.length > 0 
-        ? Math.max(...data.map(d => d.sortOrder ?? 0)) 
-        : 0;
+      
+      // Get max sort_order directly from database to avoid stale state issues
+      const { data: maxResult, error: maxError } = await supabase
+        .from("daily_data")
+        .select("sort_order")
+        .order("sort_order", { ascending: false })
+        .limit(1)
+        .single();
+      
+      const maxSortOrder = maxError ? 0 : (maxResult?.sort_order ?? 0);
 
       const newRow = {
         data: new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" }),
@@ -264,6 +270,7 @@ export const useDailyData = () => {
   }, [data, toast, fetchData]);
 
   // Update local state and save to database
+  // IMPORTANT: When receiving filtered data, merge with full data to avoid sort_order conflicts
   const updateData = useCallback(async (newData: DailyData[]) => {
     const oldData = data;
     
@@ -282,16 +289,28 @@ export const useDailyData = () => {
       });
     };
     
+    // Check if we received a subset (filtered data) - merge with full data
+    const isSubset = newData.length < oldData.length && 
+      newData.every(row => oldData.some(old => old.id === row.id));
+    
+    // Merge newData into oldData by ID (replace edited rows, keep others)
+    const mergedData = isSubset 
+      ? oldData.map(oldRow => {
+          const updatedRow = newData.find(r => r.id === oldRow.id);
+          return updatedRow || oldRow;
+        })
+      : newData;
+    
     // Check if any date was changed
-    const dateChanged = newData.some(row => {
+    const dateChanged = mergedData.some(row => {
       const oldRow = oldData.find(r => r.id === row.id);
       return oldRow && oldRow.data !== row.data;
     });
     
-    // If date changed, reorder by date and save ALL sort_orders to database
-    let finalData = newData;
+    // If date changed, reorder ALL data by date and save ALL sort_orders
+    let finalData = mergedData;
     if (dateChanged) {
-      const sorted = sortByDate(newData);
+      const sorted = sortByDate(mergedData);
       finalData = sorted.map((row, index) => ({
         ...row,
         sortOrder: index + 1,
