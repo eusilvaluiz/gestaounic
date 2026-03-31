@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { ReactNode } from "react";
+import { PieChart, Pie, Cell } from "recharts";
 
 type FormatType = "currency" | "number" | "percent" | "multiplier";
 
@@ -37,6 +38,8 @@ const calcVariation = (a: number, b: number): number | null => {
   return ((a - b) / Math.abs(b)) * 100;
 };
 
+const COLORS = ["hsl(199 89% 48%)", "hsl(38 92% 50%)"];
+
 export const ComparisonCard = ({
   title,
   valueA,
@@ -49,69 +52,69 @@ export const ComparisonCard = ({
   const isPositive = variation !== null && variation > 0;
   const isNegative = variation !== null && variation < 0;
   const isNeutral = variation === null || variation === 0;
-
   const isGood = invertLogic ? isNegative : isPositive;
   const isBad = invertLogic ? isPositive : isNegative;
 
-  // Proportion bar
-  const total = Math.abs(valueA) + Math.abs(valueB);
-  const ratioA = total > 0 ? (Math.abs(valueA) / total) * 100 : 50;
+  const pieData = [
+    { name: "A", value: Math.abs(valueA) || 0.01 },
+    { name: "B", value: Math.abs(valueB) || 0.01 },
+  ];
 
   return (
-    <div className="glass-effect rounded-xl p-5 animate-slide-up flex flex-col gap-3">
+    <div className="glass-effect rounded-xl p-4 animate-slide-up flex flex-col items-center gap-2">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {icon && <div className="text-muted-foreground">{icon}</div>}
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</p>
-        </div>
-        <div
-          className={cn(
-            "flex items-center gap-1 text-[11px] font-bold rounded-full px-2.5 py-0.5",
-            isGood && "text-success bg-success/15",
-            isBad && "text-destructive bg-destructive/15",
-            isNeutral && "text-muted-foreground bg-muted"
-          )}
-        >
-          {isPositive && <ArrowUp className="w-3 h-3" />}
-          {isNegative && <ArrowDown className="w-3 h-3" />}
-          {isNeutral && <Minus className="w-3 h-3" />}
-          <span>
+      <div className="flex items-center gap-1.5 w-full">
+        {icon && <div className="text-muted-foreground">{icon}</div>}
+        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider truncate">{title}</p>
+      </div>
+
+      {/* Donut chart */}
+      <div className="relative w-[100px] h-[100px]">
+        <PieChart width={100} height={100}>
+          <Pie
+            data={pieData}
+            cx={45}
+            cy={45}
+            innerRadius={28}
+            outerRadius={42}
+            paddingAngle={3}
+            dataKey="value"
+            strokeWidth={0}
+          >
+            {pieData.map((_, index) => (
+              <Cell key={index} fill={COLORS[index]} />
+            ))}
+          </Pie>
+        </PieChart>
+        {/* Variation badge in center */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span
+            className={cn(
+              "text-[10px] font-bold",
+              isGood && "text-success",
+              isBad && "text-destructive",
+              isNeutral && "text-muted-foreground"
+            )}
+          >
+            {isPositive && <ArrowUp className="w-2.5 h-2.5 inline" />}
+            {isNegative && <ArrowDown className="w-2.5 h-2.5 inline" />}
             {variation !== null
-              ? `${variation > 0 ? "+" : ""}${variation.toFixed(1).replace(".", ",")}%`
-              : "N/A"}
+              ? `${variation > 0 ? "+" : ""}${variation.toFixed(0)}%`
+              : "–"}
           </span>
         </div>
       </div>
 
       {/* Values */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 w-full text-center">
         <div>
-          <p className="text-[10px] text-info font-semibold mb-0.5">Período A</p>
-          <p className="text-base font-bold text-foreground">{formatValue(valueA, format)}</p>
+          <p className="text-[9px] text-info font-semibold">Período A</p>
+          <p className="text-xs font-bold text-foreground">{formatValue(valueA, format)}</p>
         </div>
         <div>
-          <p className="text-[10px] text-warning font-semibold mb-0.5">Período B</p>
-          <p className="text-base font-bold text-foreground">{formatValue(valueB, format)}</p>
+          <p className="text-[9px] text-warning font-semibold">Período B</p>
+          <p className="text-xs font-bold text-foreground">{formatValue(valueB, format)}</p>
         </div>
-      </div>
-
-      {/* Proportion bar */}
-      <div className="w-full h-2 rounded-full bg-muted overflow-hidden flex">
-        <div
-          className="h-full rounded-l-full transition-all duration-500"
-          style={{
-            width: `${ratioA}%`,
-            backgroundColor: "hsl(199 89% 48%)",
-          }}
-        />
-        <div
-          className="h-full rounded-r-full transition-all duration-500"
-          style={{
-            width: `${100 - ratioA}%`,
-            backgroundColor: "hsl(38 92% 50%)",
-          }}
-        />
       </div>
     </div>
   );
