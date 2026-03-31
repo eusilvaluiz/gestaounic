@@ -1,58 +1,45 @@
 
 
-## Funcionalidade: Tela de Comparação de Períodos
+## Redesign da Tela de Comparacao de Periodos
 
-### Resumo
+### Problema atual
+O layout atual empilha muitos `ComparisonCard` em grids densos, sem hierarquia visual clara. Os graficos de barras no final ficam repetitivos e nao agregam insight imediato. O resultado e uma pagina "achatada" e confusa.
 
-Botao "Comparar" ao lado do filtro de Periodo no header. Ao clicar, navega para uma rota `/comparar` que exibe a comparacao lado a lado de dois periodos selecionados, com graficos e indicadores de melhora/piora. Botao "Voltar" retorna ao dashboard.
+### Proposta de redesign
 
-### Arquivos a criar/modificar
+A nova pagina sera organizada em secoes visuais claras com mais variedade de elementos graficos:
 
-**1. Nova rota `/comparar` — `src/pages/Compare.tsx`**
+**1. Header (manter)** — Botao voltar + titulo + dois seletores de periodo (A e B) lado a lado.
 
-Pagina dedicada com:
-- Header com botao "Voltar ao Dashboard" e titulo "Comparacao de Periodos"
-- Dois seletores de periodo (reutilizando a logica do `DateRangeFilter`) — "Periodo A" e "Periodo B", com as mesmas opcoes (Hoje, Ontem, Ultimos 7 dias, etc. + Personalizado)
-- Carrega os dados do hook `useDailyData`, filtra por cada periodo, calcula totals/metrics para cada um
-- Exibe a comparacao em secoes:
+**2. KPI Cards principais (7 blocos)** — Redesenhar o `ComparisonCard`:
+- Layout mais limpo: valor A e valor B em destaque com badge de variacao percentual
+- Barra de progresso horizontal colorida mostrando a proporcao A vs B visualmente
+- Icone e titulo no topo, valores grandes embaixo
+- Manter cores: azul (info) para A, laranja (warning) para B, verde/vermelho para variacao
 
-**Secao 1 — KPI Cards (os 7 blocos do topo)**
-- Dois valores lado a lado (Periodo A vs Periodo B) + indicador de variacao percentual com seta verde (melhora) ou vermelha (piora)
-- Mesmos 7 cards: Investimento, Cliques, Leads Telegram, Cadastros, FTD, Depositos, ROI
+**3. Secao "Metricas Consolidadas"** — Substituir o grid de cards por uma **tabela comparativa estilizada** dentro de um painel glass-effect:
+- Colunas: Metrica | Periodo A | Periodo B | Variacao
+- Linhas alternadas, badge colorido na variacao
+- Mais compacto e legivel que 10 mini-cards
 
-**Secao 2 — Metricas Consolidadas**
-- Grid com as 10 metricas (CPC, CPV, Clique->LP, etc.), cada uma mostrando valor A, valor B e variacao
+**4. Secao "Resumo Financeiro"** — Dois paineis lado a lado (A e B) no estilo do `FinancePanel` existente, com um **donut/pie chart** central mostrando a distribuicao (Investimento vs Deposito vs Lucro) para cada periodo. Usar `recharts` `PieChart` com `Cell` colorido.
 
-**Secao 3 — Resumo Financeiro**
-- Mesmas metricas do `FinancePanel` mas em formato comparativo (A vs B + variacao)
+**5. Secao "Funil de Conversao Comparativo"** — Substituir o bar chart por um **funil visual duplo** com barras horizontais empilhadas (A sobre B), cada etapa mostrando as duas barras com cores distintas e os valores/percentuais ao lado.
 
-**Secao 4 — Funil de Conversao Comparativo**
-- Barras horizontais duplas (A vs B) para cada etapa do funil, usando cores diferentes para cada periodo
+**6. Secao "Visao Geral" (grafico)** — Um unico **Radar Chart** (recharts) comparando as metricas normalizadas dos dois periodos, dando uma visao holistica de onde A supera B e vice-versa. Alternativa ao bar chart repetitivo.
 
-**Secao 5 — Graficos de Variacao**
-- Bar chart (recharts) comparando as principais metricas lado a lado
-- Cores distintas para Periodo A (azul) e Periodo B (verde)
+### Arquivos a modificar
 
-**2. `src/components/ComparisonCard.tsx`**
-- Componente reutilizavel que recebe `title`, `valueA`, `valueB`, `format` (currency/number/percent) e calcula a variacao percentual automaticamente
-- Seta para cima verde = melhora, seta para baixo vermelha = piora
-- Para metricas de custo (CPC, Custo Lead, etc.), a logica inverte: reducao = verde
-
-**3. `src/components/ComparisonChart.tsx`**
-- Bar chart com recharts mostrando metricas lado a lado
-- Usa `ChartContainer` ja existente
-
-**4. `src/App.tsx`**
-- Adicionar rota `/comparar` apontando para `Compare`
-
-**5. `src/pages/Index.tsx`**
-- Adicionar botao "Comparar" ao lado do filtro de periodo, com `onClick={() => navigate("/comparar")`
+1. **`src/components/ComparisonCard.tsx`** — Redesenhar com barra de proporcao A/B e layout mais moderno
+2. **`src/pages/Compare.tsx`** — Reestruturar layout:
+   - Substituir grid de metricas consolidadas por tabela comparativa
+   - Adicionar PieChart/DonutChart para resumo financeiro
+   - Adicionar RadarChart para visao geral
+   - Melhorar funil comparativo com barras duplas horizontais
+3. **`src/components/ComparisonChart.tsx`** — Refatorar ou substituir pelo RadarChart
 
 ### Detalhes tecnicos
-
-- Reutiliza `useDailyData` para buscar todos os dados, filtra client-side por periodo A e B
-- Reutiliza `calculateTotals`, `calculateFunnel`, `calculateFinanceMetrics` de `utils/calculations.ts`
-- Usa `recharts` (ja instalado) para graficos comparativos via `BarChart` com duas `Bar` series
-- Identidade visual: mesmos `glass-effect`, cores, fontes e layout do dashboard atual
-- Nao altera banco de dados — tudo calculado no frontend a partir dos dados existentes
+- Usa `PieChart`, `Pie`, `Cell`, `RadarChart`, `Radar`, `PolarGrid` do `recharts` (ja instalado)
+- Mantem identidade visual dark com `glass-effect`, cores do tema (info, warning, success, destructive)
+- Responsivo: em mobile as secoes empilham verticalmente
 
