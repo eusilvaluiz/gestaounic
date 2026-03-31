@@ -10,7 +10,7 @@ interface ComparisonCardProps {
   valueB: number;
   format: FormatType;
   icon?: ReactNode;
-  invertLogic?: boolean; // true for cost metrics (lower is better)
+  invertLogic?: boolean;
 }
 
 const formatValue = (value: number, format: FormatType): string => {
@@ -50,42 +50,68 @@ export const ComparisonCard = ({
   const isNegative = variation !== null && variation < 0;
   const isNeutral = variation === null || variation === 0;
 
-  // Determine color: for cost metrics, decrease (negative variation) is good
   const isGood = invertLogic ? isNegative : isPositive;
   const isBad = invertLogic ? isPositive : isNegative;
 
+  // Proportion bar
+  const total = Math.abs(valueA) + Math.abs(valueB);
+  const ratioA = total > 0 ? (Math.abs(valueA) / total) * 100 : 50;
+
   return (
-    <div className="glass-effect rounded-xl p-4 animate-slide-up">
-      <div className="flex items-center gap-2 mb-3">
-        {icon && <div className="text-muted-foreground">{icon}</div>}
-        <p className="text-xs font-medium text-muted-foreground">{title}</p>
+    <div className="glass-effect rounded-xl p-5 animate-slide-up flex flex-col gap-3">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {icon && <div className="text-muted-foreground">{icon}</div>}
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</p>
+        </div>
+        <div
+          className={cn(
+            "flex items-center gap-1 text-[11px] font-bold rounded-full px-2.5 py-0.5",
+            isGood && "text-success bg-success/15",
+            isBad && "text-destructive bg-destructive/15",
+            isNeutral && "text-muted-foreground bg-muted"
+          )}
+        >
+          {isPositive && <ArrowUp className="w-3 h-3" />}
+          {isNegative && <ArrowDown className="w-3 h-3" />}
+          {isNeutral && <Minus className="w-3 h-3" />}
+          <span>
+            {variation !== null
+              ? `${variation > 0 ? "+" : ""}${variation.toFixed(1).replace(".", ",")}%`
+              : "N/A"}
+          </span>
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-3 mb-3">
+
+      {/* Values */}
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <p className="text-[10px] text-muted-foreground mb-0.5">Período A</p>
-          <p className="text-sm font-bold text-info">{formatValue(valueA, format)}</p>
+          <p className="text-[10px] text-info font-semibold mb-0.5">Período A</p>
+          <p className="text-base font-bold text-foreground">{formatValue(valueA, format)}</p>
         </div>
         <div>
-          <p className="text-[10px] text-muted-foreground mb-0.5">Período B</p>
-          <p className="text-sm font-bold text-warning">{formatValue(valueB, format)}</p>
+          <p className="text-[10px] text-warning font-semibold mb-0.5">Período B</p>
+          <p className="text-base font-bold text-foreground">{formatValue(valueB, format)}</p>
         </div>
       </div>
-      <div
-        className={cn(
-          "flex items-center gap-1 text-xs font-semibold rounded-md px-2 py-1 w-fit",
-          isGood && "text-success bg-success/10",
-          isBad && "text-destructive bg-destructive/10",
-          isNeutral && "text-muted-foreground bg-accent"
-        )}
-      >
-        {isPositive && <ArrowUp className="w-3 h-3" />}
-        {isNegative && <ArrowDown className="w-3 h-3" />}
-        {isNeutral && <Minus className="w-3 h-3" />}
-        <span>
-          {variation !== null
-            ? `${variation > 0 ? "+" : ""}${variation.toFixed(1).replace(".", ",")}%`
-            : "N/A"}
-        </span>
+
+      {/* Proportion bar */}
+      <div className="w-full h-2 rounded-full bg-muted overflow-hidden flex">
+        <div
+          className="h-full rounded-l-full transition-all duration-500"
+          style={{
+            width: `${ratioA}%`,
+            backgroundColor: "hsl(199 89% 48%)",
+          }}
+        />
+        <div
+          className="h-full rounded-r-full transition-all duration-500"
+          style={{
+            width: `${100 - ratioA}%`,
+            backgroundColor: "hsl(38 92% 50%)",
+          }}
+        />
       </div>
     </div>
   );
