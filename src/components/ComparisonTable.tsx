@@ -68,8 +68,8 @@ export const ComparisonTable = ({ title, rows }: ComparisonTableProps) => {
               const isPositive = variation !== null && variation > 0;
               const isNegative = variation !== null && variation < 0;
               const isNeutral = variation === null || variation === 0;
-              const isGood = row.invertLogic ? isNegative : isPositive;
-              const isBad = row.invertLogic ? isPositive : isNegative;
+              const isGood = isPositive;
+              const isBad = isNegative;
 
               return (
                 <TableRow

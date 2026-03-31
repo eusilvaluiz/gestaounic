@@ -47,14 +47,13 @@ export const ComparisonCard = ({
   valueB,
   format,
   icon,
-  invertLogic = false,
 }: ComparisonCardProps) => {
   const variation = calcVariation(valueA, valueB);
   const isPositive = variation !== null && variation > 0;
   const isNegative = variation !== null && variation < 0;
   const isNeutral = variation === null || variation === 0;
-  const isGood = invertLogic ? isNegative : isPositive;
-  const isBad = invertLogic ? isPositive : isNegative;
+  const isGood = isPositive;
+  const isBad = isNegative;
 
   const pieData = [
     { name: "A", value: Math.abs(valueA) || 0.01 },
