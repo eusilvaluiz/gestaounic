@@ -205,7 +205,7 @@ const Compare = () => {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <ComparisonCard title="Investimento" valueA={totalsA.investimento} valueB={totalsB.investimento} format="currency" icon={<DollarSign className="w-4 h-4" />} />
           <ComparisonCard title="Cliques" valueA={totalsA.cliques} valueB={totalsB.cliques} format="number" icon={<MousePointer className="w-4 h-4" />} />
           <ComparisonCard title="Leads TG" valueA={totalsA.leadTelegram} valueB={totalsB.leadTelegram} format="number" icon={<Users className="w-4 h-4" />} />
