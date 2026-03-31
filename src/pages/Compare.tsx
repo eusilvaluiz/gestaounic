@@ -203,6 +203,9 @@ const Compare = () => {
         {/* Consolidated Metrics Table */}
         <ComparisonTable title="Métricas Consolidadas" rows={consolidatedRows} />
 
+        {/* Finance Comparison Table */}
+        <ComparisonTable title="Resumo Financeiro" rows={financeRows} />
+
         {/* Finance Section - Donut Charts + Radar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <FinanceDonutChart
