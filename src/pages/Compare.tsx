@@ -140,6 +140,21 @@ const Compare = () => {
     { label: "Cadastro → FTD", valueA: metricsA.cadastroFtd, valueB: metricsB.cadastroFtd, format: "percent" as const },
   ];
 
+  // Finance comparison rows
+  const financeRows = [
+    { label: "Investimento", valueA: finA.investimento, valueB: finB.investimento, format: "currency" as const },
+    { label: "Depósito", valueA: finA.deposito, valueB: finB.deposito, format: "currency" as const },
+    { label: "Taxa", valueA: finA.taxa, valueB: finB.taxa, format: "currency" as const, invertLogic: true },
+    { label: "Saque", valueA: finA.saque, valueB: finB.saque, format: "currency" as const, invertLogic: true },
+    { label: "Expert", valueA: finA.expert, valueB: finB.expert, format: "currency" as const, invertLogic: true },
+    { label: "Custo FTD", valueA: finA.custoFtd, valueB: finB.custoFtd, format: "currency" as const, invertLogic: true },
+    { label: "Ticket Médio FTD", valueA: finA.ticketMedioFtd, valueB: finB.ticketMedioFtd, format: "currency" as const },
+    { label: "Ticket Médio Total", valueA: finA.ticketMedioTotal, valueB: finB.ticketMedioTotal, format: "currency" as const },
+    { label: "ROI Depósito", valueA: finA.roiDeposito, valueB: finB.roiDeposito, format: "multiplier" as const },
+    { label: "ROI Operação", valueA: finA.roiOperacao, valueB: finB.roiOperacao, format: "multiplier" as const },
+    { label: "Lucro Líquido", valueA: finA.lucroLiquido, valueB: finB.lucroLiquido, format: "currency" as const },
+  ];
+
   // Funnel stages
   const funnelStages = funnelA.map((item, i) => ({
     label: item.label,
