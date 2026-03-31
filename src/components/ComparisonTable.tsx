@@ -44,8 +44,8 @@ const formatValue = (value: number, format: FormatType): string => {
 };
 
 const calcVariation = (a: number, b: number): number | null => {
-  if (b === 0) return a === 0 ? 0 : null;
-  return ((a - b) / Math.abs(b)) * 100;
+  if (a === 0) return b === 0 ? 0 : null;
+  return ((b - a) / Math.abs(a)) * 100;
 };
 
 export const ComparisonTable = ({ title, rows }: ComparisonTableProps) => {

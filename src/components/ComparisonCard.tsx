@@ -33,9 +33,10 @@ const formatValue = (value: number, format: FormatType): string => {
   }
 };
 
+// Variation: how B compares to A. If B < A → negative (decrease)
 const calcVariation = (a: number, b: number): number | null => {
-  if (b === 0) return a === 0 ? 0 : null;
-  return ((a - b) / Math.abs(b)) * 100;
+  if (a === 0) return b === 0 ? 0 : null;
+  return ((b - a) / Math.abs(a)) * 100;
 };
 
 const COLORS = ["hsl(199 89% 48%)", "hsl(38 92% 50%)"];
@@ -86,23 +87,33 @@ export const ComparisonCard = ({
             ))}
           </Pie>
         </PieChart>
-        {/* Variation badge in center */}
+        {/* Variation in center - clean */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span
-            className={cn(
-              "text-[10px] font-bold",
-              isGood && "text-success",
-              isBad && "text-destructive",
-              isNeutral && "text-muted-foreground"
-            )}
-          >
-            {isPositive && <ArrowUp className="w-2.5 h-2.5 inline" />}
-            {isNegative && <ArrowDown className="w-2.5 h-2.5 inline" />}
-            {variation !== null
-              ? `${variation > 0 ? "+" : ""}${variation.toFixed(0)}%`
-              : "–"}
-          </span>
+          <div className={cn(
+            "flex flex-col items-center",
+            isGood && "text-success",
+            isBad && "text-destructive",
+            isNeutral && "text-muted-foreground"
+          )}>
+            {isPositive && <ArrowUp className="w-3 h-3" />}
+            {isNegative && <ArrowDown className="w-3 h-3" />}
+            {isNeutral && <Minus className="w-3 h-3" />}
+          </div>
         </div>
+      </div>
+
+      {/* Variation badge */}
+      <div
+        className={cn(
+          "text-[11px] font-bold rounded-full px-2 py-0.5",
+          isGood && "text-success bg-success/15",
+          isBad && "text-destructive bg-destructive/15",
+          isNeutral && "text-muted-foreground bg-muted"
+        )}
+      >
+        {variation !== null
+          ? `${variation > 0 ? "+" : ""}${variation.toFixed(1).replace(".", ",")}%`
+          : "N/A"}
       </div>
 
       {/* Values */}
