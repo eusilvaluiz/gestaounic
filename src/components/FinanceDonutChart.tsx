@@ -66,7 +66,16 @@ export const FinanceDonutChart = ({
               color: "hsl(210 40% 98%)",
               fontSize: 12,
             }}
-            formatter={(value: number) => formatCurrency(value)}
+            itemStyle={{ color: "hsl(210 40% 98%)" }}
+            labelStyle={{ color: "hsl(210 40% 98%)" }}
+            formatter={(value: number, name: string) => {
+              const colorMap: Record<string, string> = {
+                "Investimento": COLORS[0],
+                "Depósito": COLORS[1],
+                "Lucro": COLORS[2],
+              };
+              return [formatCurrency(value), <span style={{ color: colorMap[name] || "hsl(210 40% 98%)" }}>{name}</span>];
+            }}
           />
           <Legend
             wrapperStyle={{ fontSize: 11, color: "hsl(210 40% 98%)" }}
