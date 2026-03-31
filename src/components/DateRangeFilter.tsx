@@ -142,7 +142,7 @@ export const DateRangeFilter = ({ value, customRange, onChange }: DateRangeFilte
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">Período:</span>
+      
       
       <Select value={tempValue} onValueChange={handleOptionChange}>
         <SelectTrigger className="w-[180px] bg-card border-border">
