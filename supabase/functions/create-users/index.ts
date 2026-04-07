@@ -35,6 +35,11 @@ serve(async (req) => {
         password: "adsonhenrique@123!",
         name: "Adson Henrique",
       },
+      {
+        email: "gestaounic@lucas.com",
+        password: "lucas@123!",
+        name: "Lucas",
+      },
     ];
 
     const results = [];
