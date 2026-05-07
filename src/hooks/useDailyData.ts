@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DailyData } from "@/types/marketing";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { parse, isValid } from "date-fns";
 
 interface DbDailyData {
@@ -68,6 +69,9 @@ const mapLocalToDb = (row: DailyData): Omit<DbDailyData, 'id'> & { id?: string }
   sort_order: row.sortOrder ?? 0,
 });
 
+const sortRowsByOrder = (rows: DailyData[]) =>
+  [...rows].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
 export const useDailyData = () => {
   const [data, setData] = useState<DailyData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,8 +79,27 @@ export const useDailyData = () => {
   const { toast } = useToast();
   const { user, isLoading: isAuthLoading } = useAuth();
 
+  const applyRealtimeChange = useCallback((payload: RealtimePostgresChangesPayload<DbDailyData>) => {
+    setData((currentData) => {
+      if (payload.eventType === "DELETE") {
+        return currentData.filter((row) => row.id !== payload.old.id);
+      }
+
+      const changedRow = mapDbToLocal(payload.new as DbDailyData);
+
+      if (payload.eventType === "INSERT") {
+        const exists = currentData.some((row) => row.id === changedRow.id);
+        return sortRowsByOrder(exists ? currentData : [...currentData, changedRow]);
+      }
+
+      return sortRowsByOrder(
+        currentData.map((row) => (row.id === changedRow.id ? changedRow : row))
+      );
+    });
+  }, []);
+
   // Fetch data from database
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (options?: { silent?: boolean }) => {
     if (isAuthLoading || !user) {
       if (!isAuthLoading) {
         setData([]);
@@ -86,7 +109,9 @@ export const useDailyData = () => {
     }
 
     try {
-      setIsLoading(true);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
       const { data: rows, error } = await supabase
         .from("daily_data")
         .select("*")
@@ -105,7 +130,9 @@ export const useDailyData = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
     }
   }, [isAuthLoading, toast, user]);
 
@@ -391,20 +418,20 @@ export const useDailyData = () => {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "daily_data" },
-        () => {
-          fetchData();
+        (payload) => {
+          applyRealtimeChange(payload as RealtimePostgresChangesPayload<DbDailyData>);
         }
       )
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
-          fetchData();
+          fetchData({ silent: true });
         }
       });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchData, isAuthLoading, user]);
+  }, [applyRealtimeChange, fetchData, isAuthLoading, user]);
 
   return {
     data,
