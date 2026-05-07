@@ -120,6 +120,7 @@ Deno.serve(async (req) => {
     "first_deposit_paid": "ftd",
     "primeiro_deposito_pago": "ftd",
     "deposit_paid": "deposit",
+    "paid_deposit": "deposit",
     "deposito_pago": "deposit",
     "cadastro": "cadastro",
     "cadastro efetuado": "cadastro",
