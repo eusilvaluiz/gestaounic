@@ -109,6 +109,16 @@ Deno.serve(async (req) => {
   ).toLowerCase().trim();
 
   const eventMap: Record<string, EventType> = {
+    "paid_withdrawal": "withdrawal",
+    "paid withdrawal": "withdrawal",
+    "withdrawal_paid": "withdrawal",
+    "saque_pago": "withdrawal",
+    "new_signup": "cadastro",
+    "signup_created": "cadastro",
+    "first_deposit_paid": "ftd",
+    "primeiro_deposito_pago": "ftd",
+    "deposit_paid": "deposit",
+    "deposito_pago": "deposit",
     "cadastro": "cadastro",
     "cadastro efetuado": "cadastro",
     "cadastro_efetuado": "cadastro",
