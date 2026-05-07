@@ -16,9 +16,11 @@ function readToken(req: Request, payload?: Record<string, unknown>): string {
   const url = new URL(req.url);
   const auth = req.headers.get("authorization") ?? req.headers.get("Authorization") ?? "";
   const authToken = auth.replace(/^Bearer\s+/i, "").trim();
+  const looksLikeJwt = authToken.split(".").length === 3;
+  const webhookAuthToken = looksLikeJwt ? "" : authToken;
 
   const headerCandidates = [
-    authToken,
+    webhookAuthToken,
     req.headers.get("x-webhook-token"),
     req.headers.get("x-api-key"),
     req.headers.get("x-auth-token"),
