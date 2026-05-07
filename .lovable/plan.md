@@ -1,45 +1,77 @@
+## Objetivo
 
+Criar um webhook receptor que a Unic Broker chama sempre que acontecer um evento (cadastro, FTD, depósito, saque). O sistema atualiza automaticamente a linha do dia em `daily_data` e a tela atualiza em tempo real, sem precisar dar refresh.
 
-## Redesign da Tela de Comparacao de Periodos
+## Como vai funcionar
 
-### Problema atual
-O layout atual empilha muitos `ComparisonCard` em grids densos, sem hierarquia visual clara. Os graficos de barras no final ficam repetitivos e nao agregam insight imediato. O resultado e uma pagina "achatada" e confusa.
+```text
+Unic Broker  ──POST──▶  Edge Function (URL fixa + token)
+                              │
+                              ▼
+                       Acha/cria linha do
+                       dia em daily_data
+                              │
+                              ▼
+                       Incrementa o campo
+                       (cadastros++, ftd++,
+                        valor_depositos+=X...)
+                              │
+                              ▼
+                       Recalcula taxa (7%)
+                       e expert (3%)
+                              │
+                              ▼
+                  Realtime atualiza a tela 🟢
+```
 
-### Proposta de redesign
+## O que você (dono da Unic) vai precisar fazer
 
-A nova pagina sera organizada em secoes visuais claras com mais variedade de elementos graficos:
+Depois que eu implementar, você recebe:
+- **Uma URL** tipo: `https://...supabase.co/functions/v1/broker-webhook`
+- **Um token secreto** (eu gero) que você cola no painel da Unic Broker
 
-**1. Header (manter)** — Botao voltar + titulo + dois seletores de periodo (A e B) lado a lado.
+E na Unic Broker você configura o webhook pra mandar POST nessa URL com header `Authorization: Bearer SEU_TOKEN` toda vez que acontecer um evento.
 
-**2. KPI Cards principais (7 blocos)** — Redesenhar o `ComparisonCard`:
-- Layout mais limpo: valor A e valor B em destaque com badge de variacao percentual
-- Barra de progresso horizontal colorida mostrando a proporcao A vs B visualmente
-- Icone e titulo no topo, valores grandes embaixo
-- Manter cores: azul (info) para A, laranja (warning) para B, verde/vermelho para variacao
+## Formato que a Unic vai mandar (eu defino, você implementa do lado da corretora)
 
-**3. Secao "Metricas Consolidadas"** — Substituir o grid de cards por uma **tabela comparativa estilizada** dentro de um painel glass-effect:
-- Colunas: Metrica | Periodo A | Periodo B | Variacao
-- Linhas alternadas, badge colorido na variacao
-- Mais compacto e legivel que 10 mini-cards
+```json
+{
+  "event": "deposit",          // cadastro | ftd | deposit | withdrawal
+  "amount": 150.00,            // valor (só pra ftd, deposit, withdrawal)
+  "date": "2026-05-07",        // data do evento (opcional, default = hoje)
+  "user_id": "abc123"          // opcional, só pra log
+}
+```
 
-**4. Secao "Resumo Financeiro"** — Dois paineis lado a lado (A e B) no estilo do `FinancePanel` existente, com um **donut/pie chart** central mostrando a distribuicao (Investimento vs Deposito vs Lucro) para cada periodo. Usar `recharts` `PieChart` com `Cell` colorido.
+Cada tipo de evento atualiza um campo:
 
-**5. Secao "Funil de Conversao Comparativo"** — Substituir o bar chart por um **funil visual duplo** com barras horizontais empilhadas (A sobre B), cada etapa mostrando as duas barras com cores distintas e os valores/percentuais ao lado.
+| event | Campo atualizado |
+|---|---|
+| `cadastro` | `cadastros += 1` |
+| `ftd` | `ftd += 1` e `valor_ftd += amount` |
+| `deposit` | `depositos += 1` e `valor_depositos += amount` (e recalcula taxa/expert) |
+| `withdrawal` | `saque += amount` |
 
-**6. Secao "Visao Geral" (grafico)** — Um unico **Radar Chart** (recharts) comparando as metricas normalizadas dos dois periodos, dando uma visao holistica de onde A supera B e vice-versa. Alternativa ao bar chart repetitivo.
+## Implementação (passos técnicos)
 
-### Arquivos a modificar
+1. **Criar secret** `UNIC_WEBHOOK_TOKEN` (token aleatório que valida quem está chamando)
+2. **Criar edge function** `broker-webhook` (pública, sem JWT) que:
+   - Valida o header `Authorization`
+   - Valida o payload com Zod
+   - Busca a linha de `daily_data` da data informada (cria se não existir)
+   - Incrementa o campo correspondente ao evento
+   - Recalcula `taxa` e `expert` se mudou `valor_depositos`
+3. **Habilitar Realtime** na tabela `daily_data` pra tela atualizar sozinha
+4. **Adaptar `useDailyData`** pra escutar mudanças em tempo real
+5. **Criar tela de configuração** (`/integracao` ou modal nas configurações) que mostra a URL do webhook + botão pra copiar token
 
-1. **`src/components/ComparisonCard.tsx`** — Redesenhar com barra de proporcao A/B e layout mais moderno
-2. **`src/pages/Compare.tsx`** — Reestruturar layout:
-   - Substituir grid de metricas consolidadas por tabela comparativa
-   - Adicionar PieChart/DonutChart para resumo financeiro
-   - Adicionar RadarChart para visao geral
-   - Melhorar funil comparativo com barras duplas horizontais
-3. **`src/components/ComparisonChart.tsx`** — Refatorar ou substituir pelo RadarChart
+## O que NÃO muda
 
-### Detalhes tecnicos
-- Usa `PieChart`, `Pie`, `Cell`, `RadarChart`, `Radar`, `PolarGrid` do `recharts` (ja instalado)
-- Mantem identidade visual dark com `glass-effect`, cores do tema (info, warning, success, destructive)
-- Responsivo: em mobile as secoes empilham verticalmente
+- Você continua editando manualmente `Investimento`, `Cliques`, `Landing Page`, `Lead Telegram`, etc. (esses não vêm da corretora)
+- `Taxa` e `Expert` continuam sendo calculados automaticamente como já fazem
+- Os campos preenchidos pelo webhook ainda podem ser editados manualmente se quiser corrigir
 
+## Pendências (você me responde depois, não trava agora)
+
+- Confirmar se a Unic permite configurar URL + header `Authorization` no webhook (90% das plataformas permitem)
+- Se quiser, eu adapto o formato do payload pro que for mais fácil de você emitir do lado da Unic
