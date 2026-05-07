@@ -148,7 +148,24 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid amount" }, 400);
   }
 
-  const date = normalizeDate(payload?.date);
+  // For withdrawals: use the REQUEST date (not payment date) so the value
+  // is recorded in the day the customer asked for it.
+  const withdrawalRequestDate =
+    payload?.requested_at ??
+    payload?.request_date ??
+    payload?.data_solicitacao ??
+    payload?.solicitado_em ??
+    payload?.data_solicitada ??
+    payload?.requested_date ??
+    payload?.created_at ??
+    payload?.criado_em;
+
+  const dateInput =
+    event === "withdrawal"
+      ? (withdrawalRequestDate ?? payload?.date)
+      : payload?.date;
+
+  const date = normalizeDate(typeof dateInput === "string" ? dateInput : undefined);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
