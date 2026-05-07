@@ -150,17 +150,36 @@ Deno.serve(async (req) => {
     return json({ error: `Unknown event: "${rawEvent}"`, received: payload }, 400);
   }
 
-  // Try multiple amount field names
-  const amount = Number(
-    payload?.amount ?? payload?.valor ?? payload?.value ?? payload?.quantia ?? 0
-  );
+  // Nested objects from Unic Broker (withdrawal/deposit/user)
+  const wd = payload?.withdrawal ?? {};
+  const dp = payload?.deposit ?? {};
+
+  // Try multiple amount field names (incl. BR "1.234,56" format and nested objects)
+  const parseBRNumber = (v: unknown): number => {
+    if (typeof v === "number") return v;
+    if (typeof v !== "string") return NaN;
+    const s = v.trim();
+    if (!s) return NaN;
+    // "1.234,56" -> "1234.56"; "1234.56" stays; "400,00" -> "400.00"
+    const normalized = s.includes(",")
+      ? s.replace(/\./g, "").replace(",", ".")
+      : s;
+    return Number(normalized);
+  };
+
+  const rawAmount =
+    payload?.amount ?? payload?.valor ?? payload?.value ?? payload?.quantia ??
+    wd?.amount ?? dp?.amount ?? 0;
+  const amount = parseBRNumber(rawAmount);
   if (event !== "cadastro" && (!Number.isFinite(amount) || amount < 0)) {
-    return json({ error: "Invalid amount" }, 400);
+    return json({ error: "Invalid amount", rawAmount }, 400);
   }
 
   // For withdrawals: use the REQUEST date (not payment date) so the value
   // is recorded in the day the customer asked for it.
+  // Unic sends withdrawal.date = request date, withdrawal.payment_date = payment date.
   const withdrawalRequestDate =
+    wd?.date ??
     payload?.requested_at ??
     payload?.request_date ??
     payload?.data_solicitacao ??
@@ -173,9 +192,10 @@ Deno.serve(async (req) => {
   const dateInput =
     event === "withdrawal"
       ? (withdrawalRequestDate ?? payload?.date)
-      : payload?.date;
+      : (dp?.date ?? payload?.date);
 
   const date = normalizeDate(typeof dateInput === "string" ? dateInput : undefined);
+
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
