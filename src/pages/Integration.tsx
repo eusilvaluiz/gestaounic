@@ -12,13 +12,13 @@ const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const WEBHOOK_URL = `https://${PROJECT_ID}.supabase.co/functions/v1/broker-webhook`;
 
 const Integration = () => {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!loading && !user) navigate("/auth");
-  }, [user, loading, navigate]);
+    if (!isLoading && !user) navigate("/auth");
+  }, [user, isLoading, navigate]);
 
   const copy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
