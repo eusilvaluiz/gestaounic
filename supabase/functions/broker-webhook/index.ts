@@ -252,6 +252,7 @@ Deno.serve(async (req) => {
       break;
     case "ftd":
       updates.ftd = (row.ftd ?? 0) + 1;
+      updates.depositos = (row.depositos ?? 0) + 1;
       updates.valor_ftd = Number((Number(row.valor_ftd ?? 0) + amount).toFixed(2));
       updates.valor_depositos = Number((Number(row.valor_depositos ?? 0) + amount).toFixed(2));
       updates.taxa = Number((updates.valor_depositos * 0.07).toFixed(2));
