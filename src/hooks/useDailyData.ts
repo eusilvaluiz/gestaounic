@@ -364,6 +364,23 @@ export const useDailyData = () => {
     fetchData();
   }, [fetchData]);
 
+  // Realtime: refetch when broker webhook updates the table
+  useEffect(() => {
+    const channel = supabase
+      .channel("daily_data_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "daily_data" },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchData]);
+
   return {
     data,
     setData: updateData,
