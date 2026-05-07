@@ -12,6 +12,44 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+function readToken(req: Request, payload?: Record<string, unknown>): string {
+  const url = new URL(req.url);
+  const auth = req.headers.get("authorization") ?? req.headers.get("Authorization") ?? "";
+  const authToken = auth.replace(/^Bearer\s+/i, "").trim();
+
+  const headerCandidates = [
+    authToken,
+    req.headers.get("x-webhook-token"),
+    req.headers.get("x-api-key"),
+    req.headers.get("x-auth-token"),
+    req.headers.get("x-token"),
+    req.headers.get("api-key"),
+    req.headers.get("token"),
+    req.headers.get("webhook-token"),
+  ];
+
+  const queryCandidates = [
+    url.searchParams.get("token"),
+    url.searchParams.get("key"),
+    url.searchParams.get("api_key"),
+    url.searchParams.get("webhook_token"),
+  ];
+
+  const bodyCandidates = payload
+    ? [
+        payload.token,
+        payload.key,
+        payload.api_key,
+        payload.webhook_token,
+        payload.secret,
+      ]
+    : [];
+
+  return [...headerCandidates, ...queryCandidates, ...bodyCandidates]
+    .map((value) => String(value ?? "").trim())
+    .find(Boolean) ?? "";
+}
+
 type EventType = "cadastro" | "ftd" | "deposit" | "withdrawal";
 
 function todayBR(): string {
@@ -45,14 +83,6 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  // Auth
-  const expected = Deno.env.get("UNIC_WEBHOOK_TOKEN");
-  if (!expected) return json({ error: "Server misconfigured" }, 500);
-
-  const auth = req.headers.get("authorization") ?? req.headers.get("Authorization") ?? "";
-  const token = auth.replace(/^Bearer\s+/i, "").trim();
-  if (token !== expected) return json({ error: "Unauthorized" }, 401);
-
   // Parse body
   let payload: any;
   try {
@@ -60,6 +90,13 @@ Deno.serve(async (req) => {
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
+
+  // Auth
+  const expected = Deno.env.get("UNIC_WEBHOOK_TOKEN");
+  if (!expected) return json({ error: "Server misconfigured" }, 500);
+
+  const token = readToken(req, payload);
+  if (token !== expected) return json({ error: "Unauthorized" }, 401);
 
   const event = String(payload?.event ?? "").toLowerCase() as EventType;
   const allowed: EventType[] = ["cadastro", "ftd", "deposit", "withdrawal"];
