@@ -2,3 +2,6 @@ project_id = "jrydfyhkeqhovbqbmdqf"
 
 [functions.broker-webhook]
 verify_jwt = false
+
+[functions.daily-row-creator]
+verify_jwt = false
