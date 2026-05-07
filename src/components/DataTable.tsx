@@ -537,10 +537,12 @@ export const DataTable = ({
         }
         
         const updatedRow = { ...row, [field]: numValue };
-        // Auto-preenche Taxa (7%) e Expert (3%) com base em Valor Depósitos
-        if (field === "valorDepositos" && typeof numValue === "number") {
-          updatedRow.taxa = Number((numValue * 0.07).toFixed(2));
-          updatedRow.expert = Number((numValue * 0.03).toFixed(2));
+        // Recalcula Taxa (7%) e Expert (3%) sempre que qualquer campo
+        // que afete o Valor Depósitos for alterado.
+        if (field !== "taxa" && field !== "expert" && field !== "data") {
+          const base = Number(updatedRow.valorDepositos ?? 0);
+          updatedRow.taxa = Number((base * 0.07).toFixed(2));
+          updatedRow.expert = Number((base * 0.03).toFixed(2));
         }
         return updatedRow;
       }
