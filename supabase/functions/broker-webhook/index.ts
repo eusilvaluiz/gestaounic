@@ -91,20 +91,59 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid JSON" }, 400);
   }
 
-  // Auth
+  // Log raw payload for debugging
+  console.log("[webhook] raw payload:", JSON.stringify(payload));
+  console.log("[webhook] headers:", JSON.stringify(Object.fromEntries(req.headers.entries())));
+
+  // Auth — token is OPTIONAL. If UNIC_WEBHOOK_TOKEN is set AND broker sends a token,
+  // they must match. If broker sends nothing, we accept (broker UI doesn't allow auth headers).
   const expected = Deno.env.get("UNIC_WEBHOOK_TOKEN");
-  if (!expected) return json({ error: "Server misconfigured" }, 500);
-
   const token = readToken(req, payload);
-  if (token !== expected) return json({ error: "Unauthorized" }, 401);
-
-  const event = String(payload?.event ?? "").toLowerCase() as EventType;
-  const allowed: EventType[] = ["cadastro", "ftd", "deposit", "withdrawal"];
-  if (!allowed.includes(event)) {
-    return json({ error: `Invalid event. Allowed: ${allowed.join(", ")}` }, 400);
+  if (expected && token && token !== expected) {
+    return json({ error: "Unauthorized" }, 401);
   }
 
-  const amount = Number(payload?.amount ?? 0);
+  // Accept event under multiple keys and normalize Portuguese names
+  const rawEvent = String(
+    payload?.event ?? payload?.evento ?? payload?.type ?? payload?.tipo ?? payload?.action ?? ""
+  ).toLowerCase().trim();
+
+  const eventMap: Record<string, EventType> = {
+    "cadastro": "cadastro",
+    "cadastro efetuado": "cadastro",
+    "cadastro_efetuado": "cadastro",
+    "register": "cadastro",
+    "signup": "cadastro",
+    "ftd": "ftd",
+    "primeiro deposito": "ftd",
+    "primeiro depósito": "ftd",
+    "primeiro deposito pago": "ftd",
+    "primeiro depósito pago": "ftd",
+    "primeiro_deposito_pago": "ftd",
+    "first_deposit": "ftd",
+    "deposit": "deposit",
+    "deposito": "deposit",
+    "depósito": "deposit",
+    "deposito pago": "deposit",
+    "depósito pago": "deposit",
+    "deposito_pago": "deposit",
+    "withdrawal": "withdrawal",
+    "withdraw": "withdrawal",
+    "saque": "withdrawal",
+    "saque pago": "withdrawal",
+    "saque_pago": "withdrawal",
+  };
+
+  const event = eventMap[rawEvent];
+  if (!event) {
+    console.warn("[webhook] unknown event:", rawEvent, "payload:", payload);
+    return json({ error: `Unknown event: "${rawEvent}"`, received: payload }, 400);
+  }
+
+  // Try multiple amount field names
+  const amount = Number(
+    payload?.amount ?? payload?.valor ?? payload?.value ?? payload?.quantia ?? 0
+  );
   if (event !== "cadastro" && (!Number.isFinite(amount) || amount < 0)) {
     return json({ error: "Invalid amount" }, 400);
   }
