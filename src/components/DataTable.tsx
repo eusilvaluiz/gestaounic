@@ -536,7 +536,13 @@ export const DataTable = ({
           numValue = parseFloat(value.replace(",", ".")) || 0;
         }
         
-        return { ...row, [field]: numValue };
+        const updatedRow = { ...row, [field]: numValue };
+        // Auto-preenche Taxa (7%) e Expert (3%) com base em Valor Depósitos
+        if (field === "valorDepositos" && typeof numValue === "number") {
+          updatedRow.taxa = Number((numValue * 0.07).toFixed(2));
+          updatedRow.expert = Number((numValue * 0.03).toFixed(2));
+        }
+        return updatedRow;
       }
       return row;
     });
