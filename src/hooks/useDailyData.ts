@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DailyData } from "@/types/marketing";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { parse, isValid } from "date-fns";
 
 interface DbDailyData {
@@ -72,9 +73,18 @@ export const useDailyData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   // Fetch data from database
   const fetchData = useCallback(async () => {
+    if (isAuthLoading || !user) {
+      if (!isAuthLoading) {
+        setData([]);
+        setIsLoading(false);
+      }
+      return;
+    }
+
     try {
       setIsLoading(true);
       const { data: rows, error } = await supabase
@@ -97,7 +107,7 @@ export const useDailyData = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [isAuthLoading, toast, user]);
 
   // Save/update a single row
   const saveRow = useCallback(async (row: DailyData) => {
@@ -361,13 +371,23 @@ export const useDailyData = () => {
   }, [data, saveRow, toast]);
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
+    if (!user) {
+      setData([]);
+      setIsLoading(false);
+      return;
+    }
+
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, isAuthLoading, user]);
 
   // Realtime: refetch when broker webhook updates the table
   useEffect(() => {
+    if (isAuthLoading || !user) return;
+
     const channel = supabase
-      .channel("daily_data_changes")
+      .channel(`daily_data_changes:${user.id}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "daily_data" },
@@ -375,11 +395,16 @@ export const useDailyData = () => {
           fetchData();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          fetchData();
+        }
+      });
+
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchData]);
+  }, [fetchData, isAuthLoading, user]);
 
   return {
     data,
