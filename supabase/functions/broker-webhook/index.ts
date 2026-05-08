@@ -202,11 +202,40 @@ Deno.serve(async (req) => {
 
   const date = normalizeDate(typeof dateInput === "string" ? dateInput : undefined);
 
-
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
+
+  // Idempotency: try to record this event by its external id from Unic.
+  // If the same (event_type, external_id) was already recorded, skip silently.
+  const externalId = String(
+    wd?.id ?? dp?.id ?? payload?.user?.id ?? payload?.id ?? payload?.event_id ?? ""
+  ).trim();
+
+  if (externalId) {
+    const { error: dedupErr } = await supabase
+      .from("broker_events")
+      .insert({
+        event_type: event,
+        external_id: externalId,
+        event_date: date,
+        amount: event === "cadastro" ? 0 : amount,
+        raw_payload: payload,
+      });
+
+    if (dedupErr) {
+      // 23505 = unique_violation -> already processed
+      if ((dedupErr as any).code === "23505") {
+        console.log(`[webhook] duplicate ${event} id=${externalId} skipped`);
+        return json({ ok: true, duplicate: true, event, external_id: externalId });
+      }
+      console.error("dedup insert error:", dedupErr);
+      return json({ error: "DB dedup error", details: dedupErr.message }, 500);
+    }
+  } else {
+    console.warn("[webhook] no external_id present, processing without idempotency");
+  }
 
   // Find or create row for that date
   const { data: existing, error: fetchErr } = await supabase
