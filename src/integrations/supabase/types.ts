@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      broker_events: {
+        Row: {
+          amount: number
+          created_at: string
+          event_date: string
+          event_type: string
+          external_id: string
+          id: string
+          raw_payload: Json | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          event_date: string
+          event_type: string
+          external_id: string
+          id?: string
+          raw_payload?: Json | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          event_date?: string
+          event_type?: string
+          external_id?: string
+          id?: string
+          raw_payload?: Json | null
+        }
+        Relationships: []
+      }
       daily_data: {
         Row: {
           cadastros: number
