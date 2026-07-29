@@ -148,6 +148,12 @@ Deno.serve(async (req) => {
     "saque": "withdrawal",
     "saque pago": "withdrawal",
     "saque_pago": "withdrawal",
+    "first_paid_withdrawal": "withdrawal",
+    "first_withdrawal_paid": "withdrawal",
+    "paid_first_withdrawal": "withdrawal",
+    "first_withdrawal": "withdrawal",
+    "primeiro_saque_pago": "withdrawal",
+    "primeiro saque pago": "withdrawal",
   };
 
   const event = eventMap[rawEvent];
