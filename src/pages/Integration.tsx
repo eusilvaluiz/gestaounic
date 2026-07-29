@@ -9,7 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { Copy, ArrowLeft } from "lucide-react";
 
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-const WEBHOOK_URL = `https://${PROJECT_ID}.supabase.co/functions/v1/broker-webhook`;
+const BASE_WEBHOOK_URL = `https://${PROJECT_ID}.supabase.co/functions/v1/broker-webhook`;
+const WEBHOOK_URL = `${BASE_WEBHOOK_URL}?broker=3x`;
 
 const Integration = () => {
   const { user, isLoading } = useAuth();
