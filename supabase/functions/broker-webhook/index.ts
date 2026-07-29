@@ -234,7 +234,7 @@ Deno.serve(async (req) => {
         external_id: externalId,
         event_date: date,
         amount: event === "cadastro" ? 0 : amount,
-        raw_payload: payload,
+        raw_payload: { ...payload, _broker: broker },
       });
 
     if (dedupErr) {
