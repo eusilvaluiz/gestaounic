@@ -323,6 +323,6 @@ Deno.serve(async (req) => {
     return json({ error: "DB update error", details: updErr.message }, 500);
   }
 
-  console.log(`[webhook] ${event} on ${date}`, updates);
-  return json({ ok: true, event, date, updates });
+  console.log(`[webhook][${broker}] ${event} on ${date}`, updates);
+  return json({ ok: true, broker, event, date, updates });
 });
