@@ -9,7 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { Copy, ArrowLeft } from "lucide-react";
 
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-const WEBHOOK_URL = `https://${PROJECT_ID}.supabase.co/functions/v1/broker-webhook`;
+const BASE_WEBHOOK_URL = `https://${PROJECT_ID}.supabase.co/functions/v1/broker-webhook`;
+const WEBHOOK_URL = `${BASE_WEBHOOK_URL}?broker=3x`;
 
 const Integration = () => {
   const { user, isLoading } = useAuth();
@@ -46,14 +47,15 @@ const Integration = () => {
         <div>
           <h1 className="text-3xl font-bold">Integração com a Corretora</h1>
           <p className="text-muted-foreground mt-2">
-            Configure o webhook da Unic Broker para preencher automaticamente Cadastros, FTD, Depósitos e Saques.
+            Configure o webhook da <strong>3X Broker</strong> para preencher automaticamente Cadastros, FTD, Depósitos e Saques.
           </p>
         </div>
 
         <Card className="p-6 space-y-4">
-          <h2 className="text-xl font-semibold">1. URL do Webhook</h2>
+          <h2 className="text-xl font-semibold">1. URL do Webhook (3X Broker)</h2>
           <p className="text-sm text-muted-foreground">
-            Cole esta URL no painel da corretora como destino do webhook (método POST):
+            Cole esta URL no painel da 3X Broker como destino do webhook (método POST). O parâmetro{" "}
+            <code className="px-1 py-0.5 rounded bg-muted">?broker=3x</code> identifica a origem dos eventos.
           </p>
           <div className="flex gap-2">
             <Input value={WEBHOOK_URL} readOnly className="font-mono text-sm" />
@@ -61,7 +63,11 @@ const Integration = () => {
               <Copy className="h-4 w-4" />
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground">
+            <strong>Importante:</strong> desative o webhook no painel da Unic Broker para parar de receber os eventos dela. O histórico já registrado (até 28/07) permanece intacto na tabela.
+          </p>
         </Card>
+
 
         <Card className="p-6 space-y-4">
           <h2 className="text-xl font-semibold">2. Autenticação</h2>
