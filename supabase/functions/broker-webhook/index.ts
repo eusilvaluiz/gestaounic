@@ -207,11 +207,24 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Idempotency: try to record this event by its external id from Unic.
-  // If the same (event_type, external_id) was already recorded, skip silently.
-  const externalId = String(
+  // Which broker sent this? Defaults to "unic" for backwards compatibility.
+  // Configure the 3X Broker webhook with ?broker=3x (or header x-broker: 3x).
+  const url = new URL(req.url);
+  const broker = String(
+    url.searchParams.get("broker") ??
+      req.headers.get("x-broker") ??
+      payload?.broker ??
+      "unic"
+  )
+    .toLowerCase()
+    .trim();
+
+  // Idempotency: record the event by its external id, prefixed by broker so the
+  // same numeric id coming from two brokers is never treated as a duplicate.
+  const rawExternalId = String(
     wd?.id ?? dp?.id ?? payload?.user?.id ?? payload?.id ?? payload?.event_id ?? ""
   ).trim();
+  const externalId = rawExternalId ? `${broker}:${rawExternalId}` : "";
 
   if (externalId) {
     const { error: dedupErr } = await supabase
