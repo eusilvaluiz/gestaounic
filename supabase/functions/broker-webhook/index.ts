@@ -225,6 +225,24 @@ Deno.serve(async (req) => {
     .toLowerCase()
     .trim();
 
+  // Currency conversion: brokers that operate in USD (e.g. 3X) have a fixed
+  // rate configured in broker_settings. Everything downstream is in BRL.
+  let currency = "BRL";
+  let usdRate = 1;
+  const { data: settings } = await supabase
+    .from("broker_settings")
+    .select("currency, usd_rate")
+    .eq("broker", broker)
+    .maybeSingle();
+
+  if (settings) {
+    currency = settings.currency ?? "BRL";
+    usdRate = Number(settings.usd_rate ?? 1) || 1;
+  }
+
+  const rate = currency === "BRL" ? 1 : usdRate;
+  const amount = Number((originalAmount * rate).toFixed(2));
+
   // Idempotency: record the event by its external id, prefixed by broker so the
   // same numeric id coming from two brokers is never treated as a duplicate.
   const rawExternalId = String(
@@ -240,7 +258,13 @@ Deno.serve(async (req) => {
         external_id: externalId,
         event_date: date,
         amount: event === "cadastro" ? 0 : amount,
-        raw_payload: { ...payload, _broker: broker },
+        raw_payload: {
+          ...payload,
+          _broker: broker,
+          _currency: currency,
+          _rate: rate,
+          _original_amount: originalAmount,
+        },
       });
 
     if (dedupErr) {
