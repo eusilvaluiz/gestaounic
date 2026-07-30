@@ -240,8 +240,23 @@ Deno.serve(async (req) => {
     usdRate = Number(settings.usd_rate ?? 1) || 1;
   }
 
-  const rate = currency === "BRL" ? 1 : usdRate;
+  // IMPORTANT: the broker can send BRL and USD transactions on the same account.
+  // Each event carries its own currency (deposit.currency / withdrawal.currency /
+  // user.currency). Always trust the event currency; only fall back to the broker
+  // default when the payload doesn't say.
+  const eventCurrency = String(
+    dp?.currency ?? wd?.currency ?? payload?.currency ?? currency
+  )
+    .toUpperCase()
+    .trim();
+
+  if (eventCurrency === "BRL" || eventCurrency === "USD") {
+    currency = eventCurrency;
+  }
+
+  const rate = currency === "USD" ? usdRate : 1;
   const amount = Number((originalAmount * rate).toFixed(2));
+
 
   // Idempotency: record the event by its external id, prefixed by broker so the
   // same numeric id coming from two brokers is never treated as a duplicate.
