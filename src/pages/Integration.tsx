@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { Copy, ArrowLeft } from "lucide-react";
+import { Copy, ArrowLeft, DollarSign } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const BASE_WEBHOOK_URL = `https://${PROJECT_ID}.supabase.co/functions/v1/broker-webhook`;
@@ -17,9 +18,50 @@ const Integration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [rateInput, setRateInput] = useState("");
+  const [savedRate, setSavedRate] = useState<number | null>(null);
+  const [isSavingRate, setIsSavingRate] = useState(false);
+
   useEffect(() => {
     if (!isLoading && !user) navigate("/auth");
   }, [user, isLoading, navigate]);
+
+  const loadRate = useCallback(async () => {
+    const { data } = await supabase
+      .from("broker_settings")
+      .select("usd_rate")
+      .eq("broker", "3x")
+      .maybeSingle();
+    if (data) {
+      const rate = Number(data.usd_rate);
+      setSavedRate(rate);
+      setRateInput(rate.toFixed(2).replace(".", ","));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) loadRate();
+  }, [user, loadRate]);
+
+  const saveRate = async () => {
+    const parsed = Number(rateInput.replace(/\./g, "").replace(",", "."));
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      toast({ title: "Cotação inválida", description: "Informe um valor como 5,20.", variant: "destructive" });
+      return;
+    }
+    setIsSavingRate(true);
+    const { error } = await supabase
+      .from("broker_settings")
+      .update({ usd_rate: parsed, currency: "USD" })
+      .eq("broker", "3x");
+    setIsSavingRate(false);
+    if (error) {
+      toast({ title: "Erro ao salvar cotação", description: error.message, variant: "destructive" });
+      return;
+    }
+    setSavedRate(parsed);
+    toast({ title: "Cotação salva", description: `Novos eventos da 3X usarão R$ ${parsed.toFixed(2).replace(".", ",")} por dólar.` });
+  };
 
   const copy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
