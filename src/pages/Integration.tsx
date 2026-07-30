@@ -110,6 +110,37 @@ const Integration = () => {
           </p>
         </Card>
 
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-primary" /> Cotação do Dólar (3X Broker)
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            A 3X opera em <strong>dólar</strong>. Todo valor de depósito, FTD e saque recebido é multiplicado por esta
+            cotação antes de entrar na planilha, então toda a matemática (taxa, expert, ROI, lucro) continua em reais.
+          </p>
+          <div className="flex gap-2 items-end max-w-sm">
+            <div className="flex-1 space-y-1">
+              <Label htmlFor="usd-rate">R$ por US$ 1,00</Label>
+              <Input
+                id="usd-rate"
+                value={rateInput}
+                onChange={(e) => setRateInput(e.target.value)}
+                placeholder="5,20"
+                className="font-mono"
+              />
+            </div>
+            <Button onClick={saveRate} disabled={isSavingRate}>
+              {isSavingRate ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+          {savedRate !== null && (
+            <p className="text-xs text-muted-foreground">
+              Cotação ativa: <strong>R$ {savedRate.toFixed(2).replace(".", ",")}</strong> — um depósito de US$ 50 entra
+              como R$ {(savedRate * 50).toFixed(2).replace(".", ",")}. Alterar a cotação afeta apenas os eventos novos.
+            </p>
+          )}
+        </Card>
+
 
         <Card className="p-6 space-y-4">
           <h2 className="text-xl font-semibold">2. Autenticação</h2>
