@@ -44,6 +44,33 @@ export type Database = {
         }
         Relationships: []
       }
+      broker_settings: {
+        Row: {
+          broker: string
+          created_at: string
+          currency: string
+          id: string
+          updated_at: string
+          usd_rate: number
+        }
+        Insert: {
+          broker: string
+          created_at?: string
+          currency?: string
+          id?: string
+          updated_at?: string
+          usd_rate?: number
+        }
+        Update: {
+          broker?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          updated_at?: string
+          usd_rate?: number
+        }
+        Relationships: []
+      }
       daily_data: {
         Row: {
           cadastros: number

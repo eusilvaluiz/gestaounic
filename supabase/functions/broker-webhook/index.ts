@@ -182,8 +182,8 @@ Deno.serve(async (req) => {
   const rawAmount =
     payload?.amount ?? payload?.valor ?? payload?.value ?? payload?.quantia ??
     wd?.amount ?? dp?.amount ?? 0;
-  const amount = parseBRNumber(rawAmount);
-  if (event !== "cadastro" && (!Number.isFinite(amount) || amount < 0)) {
+  const originalAmount = parseBRNumber(rawAmount);
+  if (event !== "cadastro" && (!Number.isFinite(originalAmount) || originalAmount < 0)) {
     return json({ error: "Invalid amount", rawAmount }, 400);
   }
 
@@ -225,6 +225,24 @@ Deno.serve(async (req) => {
     .toLowerCase()
     .trim();
 
+  // Currency conversion: brokers that operate in USD (e.g. 3X) have a fixed
+  // rate configured in broker_settings. Everything downstream is in BRL.
+  let currency = "BRL";
+  let usdRate = 1;
+  const { data: settings } = await supabase
+    .from("broker_settings")
+    .select("currency, usd_rate")
+    .eq("broker", broker)
+    .maybeSingle();
+
+  if (settings) {
+    currency = settings.currency ?? "BRL";
+    usdRate = Number(settings.usd_rate ?? 1) || 1;
+  }
+
+  const rate = currency === "BRL" ? 1 : usdRate;
+  const amount = Number((originalAmount * rate).toFixed(2));
+
   // Idempotency: record the event by its external id, prefixed by broker so the
   // same numeric id coming from two brokers is never treated as a duplicate.
   const rawExternalId = String(
@@ -240,7 +258,13 @@ Deno.serve(async (req) => {
         external_id: externalId,
         event_date: date,
         amount: event === "cadastro" ? 0 : amount,
-        raw_payload: { ...payload, _broker: broker },
+        raw_payload: {
+          ...payload,
+          _broker: broker,
+          _currency: currency,
+          _rate: rate,
+          _original_amount: originalAmount,
+        },
       });
 
     if (dedupErr) {
@@ -329,6 +353,6 @@ Deno.serve(async (req) => {
     return json({ error: "DB update error", details: updErr.message }, 500);
   }
 
-  console.log(`[webhook][${broker}] ${event} on ${date}`, updates);
-  return json({ ok: true, broker, event, date, updates });
+  console.log(`[webhook][${broker}] ${event} on ${date} (${currency} ${originalAmount} x ${rate})`, updates);
+  return json({ ok: true, broker, currency, rate, original_amount: originalAmount, event, date, updates });
 });
