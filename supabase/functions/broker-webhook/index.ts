@@ -187,6 +187,18 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid amount", rawAmount }, 400);
   }
 
+  // Ignore transactions that are not actually settled (pix generated but unpaid,
+  // cancelled, expired...). The broker sends status_name "Pago" / status 2 when paid.
+  const statusName = String(dp?.status_name ?? wd?.status_name ?? payload?.status_name ?? "")
+    .toLowerCase()
+    .trim();
+  if (event !== "cadastro" && statusName && statusName !== "pago" && statusName !== "paid") {
+    console.log(`[webhook] ignoring unpaid ${event} status="${statusName}"`);
+    return json({ ok: true, ignored: true, reason: "not_paid", status: statusName });
+  }
+
+
+
   // For withdrawals: use the REQUEST date (not payment date) so the value
   // is recorded in the day the customer asked for it.
   // Unic sends withdrawal.date = request date, withdrawal.payment_date = payment date.
