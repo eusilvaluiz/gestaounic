@@ -182,8 +182,8 @@ Deno.serve(async (req) => {
   const rawAmount =
     payload?.amount ?? payload?.valor ?? payload?.value ?? payload?.quantia ??
     wd?.amount ?? dp?.amount ?? 0;
-  const amount = parseBRNumber(rawAmount);
-  if (event !== "cadastro" && (!Number.isFinite(amount) || amount < 0)) {
+  const originalAmount = parseBRNumber(rawAmount);
+  if (event !== "cadastro" && (!Number.isFinite(originalAmount) || originalAmount < 0)) {
     return json({ error: "Invalid amount", rawAmount }, 400);
   }
 
