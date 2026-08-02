@@ -1,0 +1,1 @@
+UPDATE public.daily_data SET saque = saque + 99.70, updated_at = now() WHERE data = '01/08/26';
