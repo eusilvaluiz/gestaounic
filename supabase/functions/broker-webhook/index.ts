@@ -143,18 +143,47 @@ Deno.serve(async (req) => {
     "deposito pago": "deposit",
     "depósito pago": "deposit",
     "deposito_pago": "deposit",
-    "withdrawal": "withdrawal",
-    "withdraw": "withdrawal",
-    "saque": "withdrawal",
+    // NOTE: only PAID withdrawal events are mapped. Withdrawal REQUESTS
+    // ("Em aberto") must never hit the spreadsheet — see ignoredEvents below.
     "saque pago": "withdrawal",
     "saque_pago": "withdrawal",
     "first_paid_withdrawal": "withdrawal",
     "first_withdrawal_paid": "withdrawal",
     "paid_first_withdrawal": "withdrawal",
-    "first_withdrawal": "withdrawal",
     "primeiro_saque_pago": "withdrawal",
     "primeiro saque pago": "withdrawal",
   };
+
+  // Withdrawal request / pending / cancelled events: acknowledge but do NOT record.
+  const ignoredEvents = new Set([
+    "withdrawal",
+    "withdraw",
+    "saque",
+    "first_withdrawal",
+    "primeiro_saque",
+    "primeiro saque",
+    "withdrawal_requested",
+    "requested_withdrawal",
+    "new_withdrawal",
+    "withdrawal_created",
+    "saque_solicitado",
+    "saque solicitado",
+    "novo_saque",
+    "pending_withdrawal",
+    "withdrawal_pending",
+    "cancelled_withdrawal",
+    "withdrawal_cancelled",
+    "saque_cancelado",
+    "refused_withdrawal",
+    "withdrawal_refused",
+    "saque_recusado",
+  ]);
+
+  if (ignoredEvents.has(rawEvent)) {
+    console.log(`[webhook] ignoring non-paid withdrawal event: "${rawEvent}"`);
+    return json({ ok: true, ignored: true, reason: "withdrawal_not_paid", event: rawEvent });
+  }
+
 
   const event = eventMap[rawEvent];
   if (!event) {
