@@ -187,12 +187,15 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid amount", rawAmount }, 400);
   }
 
-  // Ignore transactions that are not actually settled (pix generated but unpaid,
+  // Ignore DEPOSITS that are not actually settled (pix generated but unpaid,
   // cancelled, expired...). The broker sends status_name "Pago" / status 2 when paid.
-  const statusName = String(dp?.status_name ?? wd?.status_name ?? payload?.status_name ?? "")
+  // IMPORTANT: withdrawals are NOT status-checked — this white label keeps
+  // status_name "Em aberto" on the withdrawal object even when it fires the
+  // paid_withdrawal event, so the event type itself is the paid signal.
+  const statusName = String(dp?.status_name ?? payload?.status_name ?? "")
     .toLowerCase()
     .trim();
-  if (event !== "cadastro" && statusName && statusName !== "pago" && statusName !== "paid") {
+  if ((event === "deposit" || event === "ftd") && statusName && statusName !== "pago" && statusName !== "paid") {
     console.log(`[webhook] ignoring unpaid ${event} status="${statusName}"`);
     return json({ ok: true, ignored: true, reason: "not_paid", status: statusName });
   }
