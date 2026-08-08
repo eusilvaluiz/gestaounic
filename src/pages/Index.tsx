@@ -334,12 +334,12 @@ const Index = () => {
             variant={totalMetrics.roiTotal >= 1 ? "success" : "danger"}
           />
           <MetricCard
-            title="Saldo em Carteira"
-            value={formatCurrency(saldoCarteira)}
+            title="GGR"
+            value={formatCurrency(totals.rev10)}
             icon={<Wallet className="w-5 h-5" />}
-            variant={saldoCarteira >= 0 ? "success" : "danger"}
-            subtitle="Saldo contínuo (sem filtro)"
+            variant={totals.rev10 >= 0 ? "success" : "danger"}
           />
+
 
 
         </div>
