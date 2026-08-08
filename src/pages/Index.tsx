@@ -397,12 +397,6 @@ const Index = () => {
         </div>
 
         {/* Data Table */}
-        <div className="flex justify-end">
-          <Button onClick={reconcileMeta} disabled={isReconcilingMeta} className="gap-2">
-            <RefreshCw className={`h-4 w-4 ${isReconcilingMeta ? "animate-spin" : ""}`} />
-            {isReconcilingMeta ? "Reconciliando..." : "Reconciliar últimos 7 dias"}
-          </Button>
-        </div>
         <DataTable 
           data={filteredData}
           onDataChange={setData}
@@ -411,6 +405,8 @@ const Index = () => {
           onReorderRows={reorderRows}
           isLoading={isLoadingData}
           isSaving={isSavingData}
+          onSync={reconcileMeta}
+          isSyncing={isReconcilingMeta}
         />
       </div>
     </div>
