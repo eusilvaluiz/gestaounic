@@ -623,6 +623,22 @@ export const DataTable = ({
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-semibold text-foreground">Dados Diários</h3>
+          {onSync && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={onSync}
+                  disabled={isSyncing}
+                  aria-label="Sincronizar últimos 7 dias"
+                  className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Sincronizar últimos 7 dias (automático à meia-noite)</TooltipContent>
+            </Tooltip>
+          )}
           {isSaving && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
