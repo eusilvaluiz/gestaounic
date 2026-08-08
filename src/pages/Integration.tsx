@@ -141,6 +141,34 @@ const Integration = () => {
           )}
         </Card>
 
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <RefreshCw className="h-5 w-5 text-primary" /> GGR (3X Broker)
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            O GGR é buscado direto no painel da 3X (endpoint <code className="px-1 py-0.5 rounded bg-muted">/api/balance</code>),
+            convertido pela cotação acima e gravado na coluna <strong>GGR</strong> da planilha. A sincronização roda
+            automaticamente de hora em hora — use o botão para atualizar agora.
+          </p>
+          <div className="flex gap-2 items-end max-w-md">
+            <div className="flex-1 space-y-1">
+              <Label htmlFor="ggr-date">Data (opcional, AAAA-MM-DD)</Label>
+              <Input
+                id="ggr-date"
+                value={ggrDate}
+                onChange={(e) => setGgrDate(e.target.value)}
+                placeholder="hoje"
+                className="font-mono"
+              />
+            </div>
+            <Button onClick={syncGgr} disabled={isSyncingGgr}>
+              {isSyncingGgr ? "Buscando..." : "Atualizar GGR"}
+            </Button>
+          </div>
+        </Card>
+
+
+
 
         <Card className="p-6 space-y-4">
           <h2 className="text-xl font-semibold">2. Autenticação</h2>
