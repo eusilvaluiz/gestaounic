@@ -5,3 +5,7 @@ verify_jwt = false
 
 [functions.daily-row-creator]
 verify_jwt = false
+
+[functions.ggr-sync]
+verify_jwt = false
+
