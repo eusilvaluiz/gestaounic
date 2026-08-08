@@ -3,7 +3,7 @@ import { DailyData, CalculatedMetrics } from "@/types/marketing";
 import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { NumberInput } from "@/components/NumberInput";
-import { Trash2, Plus, Loader2, GripVertical, CalendarIcon, Lock, LockOpen } from "lucide-react";
+import { Trash2, Plus, Loader2, GripVertical, CalendarIcon, Lock, LockOpen, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
