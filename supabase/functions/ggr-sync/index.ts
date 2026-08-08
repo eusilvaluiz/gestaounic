@@ -22,14 +22,15 @@ function parseBRNumber(v: unknown): number {
   return Number(normalized);
 }
 
-function isoTodaySP(): string {
+function isoTodaySP(offsetDays = 0): string {
+  const now = new Date(Date.now() + offsetDays * 86400000);
   // en-CA gives YYYY-MM-DD
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  }).format(now);
 }
 
 // YYYY-MM-DD -> dd/MM/yy (format used in daily_data.data)
@@ -37,6 +38,7 @@ function isoToBR(iso: string): string {
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y.slice(2)}`;
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
