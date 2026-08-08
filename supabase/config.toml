@@ -12,3 +12,7 @@ verify_jwt = false
 [functions.meta-sync]
 verify_jwt = false
 
+[functions.tracker-sync]
+verify_jwt = false
+
+

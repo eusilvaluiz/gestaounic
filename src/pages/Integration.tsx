@@ -27,6 +27,10 @@ const Integration = () => {
   const [metaUntil, setMetaUntil] = useState("");
   const [isSyncingMeta, setIsSyncingMeta] = useState(false);
   const [isReconcilingMeta, setIsReconcilingMeta] = useState(false);
+  const [trackerSince, setTrackerSince] = useState("");
+  const [trackerUntil, setTrackerUntil] = useState("");
+  const [isSyncingTracker, setIsSyncingTracker] = useState(false);
+
 
   const isoSP = (offsetDays: number) =>
     new Intl.DateTimeFormat("en-CA", {
@@ -81,7 +85,31 @@ const Integration = () => {
     });
   };
 
+  const syncTracker = async () => {
+    setIsSyncingTracker(true);
+    const body: Record<string, string> = {};
+    if (trackerSince.trim()) body.since = trackerSince.trim();
+    if (trackerUntil.trim()) body.until = trackerUntil.trim();
+    const { data, error } = await supabase.functions.invoke("tracker-sync", { body });
+    setIsSyncingTracker(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Erro ao buscar saídas",
+        description: (data as any)?.error ?? error?.message ?? "Falha na consulta.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const d = data as any;
+    const dias = (d.results ?? []).map((r: any) => r.date).join(", ");
+    toast({
+      title: "Saídas do canal atualizadas",
+      description: `dias: ${dias || "nenhum dado no período"}`,
+    });
+  };
+
   const syncGgr = async () => {
+
     setIsSyncingGgr(true);
     const { data, error } = await supabase.functions.invoke("ggr-sync", {
       body: ggrDate.trim() ? { date: ggrDate.trim() } : {},
@@ -292,6 +320,43 @@ const Integration = () => {
 
           </div>
         </Card>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <RefreshCw className="h-5 w-5 text-primary" /> Saídas do canal (Alpha Tracker)
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            A coluna <strong>Saída Telegram</strong> é buscada direto no CRM Alpha Tracker, dia a dia (00:00–23:59, fuso
+            de São Paulo). Roda automaticamente a cada 15 minutos (hoje e ontem). Use o botão para atualizar agora ou
+            reprocessar um período.
+          </p>
+          <div className="flex gap-2 items-end flex-wrap">
+            <div className="space-y-1">
+              <Label htmlFor="tracker-since">Início (opcional)</Label>
+              <Input
+                id="tracker-since"
+                value={trackerSince}
+                onChange={(e) => setTrackerSince(e.target.value)}
+                placeholder="AAAA-MM-DD"
+                className="font-mono w-40"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="tracker-until">Fim (opcional)</Label>
+              <Input
+                id="tracker-until"
+                value={trackerUntil}
+                onChange={(e) => setTrackerUntil(e.target.value)}
+                placeholder="AAAA-MM-DD"
+                className="font-mono w-40"
+              />
+            </div>
+            <Button onClick={syncTracker} disabled={isSyncingTracker}>
+              {isSyncingTracker ? "Buscando..." : "Atualizar saídas"}
+            </Button>
+          </div>
+        </Card>
+
 
 
 
