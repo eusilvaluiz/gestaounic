@@ -257,7 +257,10 @@ const Integration = () => {
             da BM. Cliques = evento <code className="px-1 py-0.5 rounded bg-muted">link_click</code>, LP ={" "}
             <code className="px-1 py-0.5 rounded bg-muted">landing_page_view</code>, Lead Telegram ={" "}
             <code className="px-1 py-0.5 rounded bg-muted">enter_channel</code>. Roda automaticamente a cada 15 minutos
-            (hoje e ontem) — use o botão para atualizar agora ou reprocessar um período.
+            (hoje e ontem). Além disso, todo dia à <strong>meia-noite</strong> o sistema reconfere automaticamente os
+            últimos 7 dias — a Meta ainda ajusta gasto, cliques e LP por vários dias, então os valores das linhas
+            antigas são corrigidos sozinhos. Use os botões para atualizar agora ou reprocessar um período.
+
           </p>
           <div className="flex gap-2 items-end flex-wrap">
             <div className="space-y-1">
