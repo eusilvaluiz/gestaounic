@@ -433,7 +433,7 @@ const Index = () => {
           onReorderRows={reorderRows}
           isLoading={isLoadingData}
           isSaving={isSavingData}
-          onSync={reconcileMeta}
+          onSync={syncAll}
           isSyncing={isReconcilingMeta}
         />
       </div>
