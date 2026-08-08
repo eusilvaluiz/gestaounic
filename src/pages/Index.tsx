@@ -340,11 +340,12 @@ const Index = () => {
           />
           <MetricCard
             title="Saldo em Carteira"
-            value={formatCurrency(saldoCarteira)}
+            value={formatUsd(saldoCarteira)}
             icon={<Wallet className="w-5 h-5" />}
             variant={saldoCarteira >= 0 ? "success" : "danger"}
-            subtitle="Total contínuo (sem filtro)"
+            subtitle="Saldo contínuo em dólar"
           />
+
 
         </div>
 
