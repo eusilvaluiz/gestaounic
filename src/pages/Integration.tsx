@@ -23,6 +23,32 @@ const Integration = () => {
   const [isSavingRate, setIsSavingRate] = useState(false);
   const [ggrDate, setGgrDate] = useState("");
   const [isSyncingGgr, setIsSyncingGgr] = useState(false);
+  const [metaSince, setMetaSince] = useState("");
+  const [metaUntil, setMetaUntil] = useState("");
+  const [isSyncingMeta, setIsSyncingMeta] = useState(false);
+
+  const syncMeta = async () => {
+    setIsSyncingMeta(true);
+    const body: Record<string, string> = {};
+    if (metaSince.trim()) body.since = metaSince.trim();
+    if (metaUntil.trim()) body.until = metaUntil.trim();
+    const { data, error } = await supabase.functions.invoke("meta-sync", { body });
+    setIsSyncingMeta(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Erro ao buscar tráfego",
+        description: (data as any)?.error ?? error?.message ?? "Falha na consulta.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const d = data as any;
+    const dias = (d.results ?? []).map((r: any) => r.date).join(", ");
+    toast({
+      title: "Tráfego atualizado",
+      description: `${d.accounts} contas · dias: ${dias || "nenhum dado no período"}`,
+    });
+  };
 
   const syncGgr = async () => {
     setIsSyncingGgr(true);
@@ -189,6 +215,47 @@ const Integration = () => {
             </Button>
           </div>
         </Card>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <RefreshCw className="h-5 w-5 text-primary" /> Tráfego (Meta Ads)
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            As colunas <strong>Investimento</strong>, <strong>Cliques</strong>, <strong>Landing Page</strong> e{" "}
+            <strong>Lead Telegram</strong> são buscadas direto na Graph API (v21.0), somando todas as contas de anúncio
+            da BM. Cliques = evento <code className="px-1 py-0.5 rounded bg-muted">link_click</code>, LP ={" "}
+            <code className="px-1 py-0.5 rounded bg-muted">landing_page_view</code>, Lead Telegram ={" "}
+            <code className="px-1 py-0.5 rounded bg-muted">enter_channel</code>. Roda automaticamente a cada 15 minutos
+            (hoje e ontem) — use o botão para atualizar agora ou reprocessar um período.
+          </p>
+          <div className="flex gap-2 items-end flex-wrap">
+            <div className="space-y-1">
+              <Label htmlFor="meta-since">Início (opcional)</Label>
+              <Input
+                id="meta-since"
+                value={metaSince}
+                onChange={(e) => setMetaSince(e.target.value)}
+                placeholder="AAAA-MM-DD"
+                className="font-mono w-40"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="meta-until">Fim (opcional)</Label>
+              <Input
+                id="meta-until"
+                value={metaUntil}
+                onChange={(e) => setMetaUntil(e.target.value)}
+                placeholder="AAAA-MM-DD"
+                className="font-mono w-40"
+              />
+            </div>
+            <Button onClick={syncMeta} disabled={isSyncingMeta}>
+              {isSyncingMeta ? "Buscando..." : "Atualizar tráfego"}
+            </Button>
+          </div>
+        </Card>
+
+
 
 
 
