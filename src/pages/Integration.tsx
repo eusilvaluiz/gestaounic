@@ -252,6 +252,10 @@ const Integration = () => {
             <Button onClick={syncMeta} disabled={isSyncingMeta}>
               {isSyncingMeta ? "Buscando..." : "Atualizar tráfego"}
             </Button>
+            <Button variant="secondary" onClick={reconcileMeta} disabled={isReconcilingMeta}>
+              {isReconcilingMeta ? "Reconciliando..." : "Reconciliar últimos 7 dias"}
+            </Button>
+
           </div>
         </Card>
 
