@@ -631,13 +631,13 @@ export const DataTable = ({
                   type="button"
                   onClick={onSync}
                   disabled={isSyncing}
-                  aria-label="Sincronizar últimos 7 dias"
+                  aria-label="Sincronizar tudo"
                   className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
                 </button>
               </TooltipTrigger>
-              <TooltipContent>Sincronizar últimos 7 dias (automático à meia-noite)</TooltipContent>
+              <TooltipContent>Atualiza Meta, GGR e Alpha Tracker de uma vez</TooltipContent>
             </Tooltip>
           )}
           {isSaving && (
