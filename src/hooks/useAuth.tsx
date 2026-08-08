@@ -18,26 +18,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let settled = false;
+
+    const settle = () => {
+      settled = true;
+      setIsLoading(false);
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setIsLoading(false);
+        settle();
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        settle();
+      })
+      .catch((error) => {
+        console.error("Error restoring session:", error);
+        settle();
+      });
+
+    // Safety net: if the network hangs (offline / failed token refresh),
+    // fall back to the locally stored session instead of loading forever.
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      console.warn("Auth session check timed out, using cached session if any.");
+      settle();
+    }, 5000);
 
     return () => {
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
+
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
