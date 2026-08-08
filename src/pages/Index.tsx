@@ -8,6 +8,8 @@ import { FinancePanel } from "@/components/FinancePanel";
 import { DateRangeFilter, DateRangeOption, DateRange, getDateRangeFromOption } from "@/components/DateRangeFilter";
 import { useDailyData } from "@/hooks/useDailyData";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import { DailyData } from "@/types/marketing";
 import { parse, isWithinInterval, startOfDay, endOfDay } from "date-fns";
