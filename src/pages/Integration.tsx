@@ -26,6 +26,37 @@ const Integration = () => {
   const [metaSince, setMetaSince] = useState("");
   const [metaUntil, setMetaUntil] = useState("");
   const [isSyncingMeta, setIsSyncingMeta] = useState(false);
+  const [isReconcilingMeta, setIsReconcilingMeta] = useState(false);
+
+  const isoSP = (offsetDays: number) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Sao_Paulo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(Date.now() + offsetDays * 86400000));
+
+  const reconcileMeta = async () => {
+    setIsReconcilingMeta(true);
+    const { data, error } = await supabase.functions.invoke("meta-sync", {
+      body: { since: isoSP(-7), until: isoSP(-1) },
+    });
+    setIsReconcilingMeta(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Erro na reconciliação",
+        description: (data as any)?.error ?? error?.message ?? "Falha na consulta.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const d = data as any;
+    toast({
+      title: "Últimos 7 dias reconciliados",
+      description: `${(d.results ?? []).length} dia(s) atualizado(s) com os valores finais da Meta.`,
+    });
+  };
+
 
   const syncMeta = async () => {
     setIsSyncingMeta(true);
@@ -226,7 +257,10 @@ const Integration = () => {
             da BM. Cliques = evento <code className="px-1 py-0.5 rounded bg-muted">link_click</code>, LP ={" "}
             <code className="px-1 py-0.5 rounded bg-muted">landing_page_view</code>, Lead Telegram ={" "}
             <code className="px-1 py-0.5 rounded bg-muted">enter_channel</code>. Roda automaticamente a cada 15 minutos
-            (hoje e ontem) — use o botão para atualizar agora ou reprocessar um período.
+            (hoje e ontem). Além disso, todo dia à <strong>meia-noite</strong> o sistema reconfere automaticamente os
+            últimos 7 dias — a Meta ainda ajusta gasto, cliques e LP por vários dias, então os valores das linhas
+            antigas são corrigidos sozinhos. Use os botões para atualizar agora ou reprocessar um período.
+
           </p>
           <div className="flex gap-2 items-end flex-wrap">
             <div className="space-y-1">
@@ -252,6 +286,10 @@ const Integration = () => {
             <Button onClick={syncMeta} disabled={isSyncingMeta}>
               {isSyncingMeta ? "Buscando..." : "Atualizar tráfego"}
             </Button>
+            <Button variant="secondary" onClick={reconcileMeta} disabled={isReconcilingMeta}>
+              {isReconcilingMeta ? "Reconciliando..." : "Reconciliar últimos 7 dias"}
+            </Button>
+
           </div>
         </Card>
 
