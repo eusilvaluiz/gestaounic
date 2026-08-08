@@ -8,6 +8,8 @@ import { FinancePanel } from "@/components/FinancePanel";
 import { DateRangeFilter, DateRangeOption, DateRange, getDateRangeFromOption } from "@/components/DateRangeFilter";
 import { useDailyData } from "@/hooks/useDailyData";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 
 import { Button } from "@/components/ui/button";
@@ -23,7 +25,7 @@ import {
   Percent,
   LogOut,
   Wallet,
-
+  RefreshCw,
   Loader2
 } from "lucide-react";
 
@@ -90,6 +92,8 @@ const filterDataByDateRange = (data: DailyData[], range: DateRange): DailyData[]
 const Index = () => {
   const { user, isLoading: isAuthLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isReconcilingMeta, setIsReconcilingMeta] = useState(false);
   
   // Date filter state
   const [dateRangeOption, setDateRangeOption] = useState<DateRangeOption>("last7days");
@@ -187,6 +191,37 @@ const Index = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate("/auth");
+  };
+
+  const reconcileMeta = async () => {
+    const isoSP = (offsetDays: number) =>
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Sao_Paulo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(Date.now() + offsetDays * 86400000));
+
+    setIsReconcilingMeta(true);
+    const { data: result, error } = await supabase.functions.invoke("meta-sync", {
+      body: { since: isoSP(-7), until: isoSP(-1) },
+    });
+    setIsReconcilingMeta(false);
+
+    if (error || (result as { error?: string } | null)?.error) {
+      toast({
+        title: "Erro na reconciliação",
+        description: (result as { error?: string } | null)?.error ?? error?.message ?? "Falha na consulta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const updatedDays = (result as { results?: unknown[] } | null)?.results?.length ?? 0;
+    toast({
+      title: "Últimos 7 dias reconciliados",
+      description: `${updatedDays} dia(s) atualizado(s) com os valores finais da Meta.`,
+    });
   };
 
   // Show loading while checking auth
@@ -362,6 +397,12 @@ const Index = () => {
         </div>
 
         {/* Data Table */}
+        <div className="flex justify-end">
+          <Button onClick={reconcileMeta} disabled={isReconcilingMeta} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${isReconcilingMeta ? "animate-spin" : ""}`} />
+            {isReconcilingMeta ? "Reconciliando..." : "Reconciliar últimos 7 dias"}
+          </Button>
+        </div>
         <DataTable 
           data={filteredData}
           onDataChange={setData}
