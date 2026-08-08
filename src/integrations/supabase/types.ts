@@ -53,6 +53,7 @@ export type Database = {
           updated_at: string
           usd_rate: number
           usd_withdrawal_rate: number
+          wallet_balance_brl: number
           wallet_balance_usd: number
           wallet_baseline_at: string | null
           wallet_baseline_deposits_brl: number
@@ -67,6 +68,7 @@ export type Database = {
           updated_at?: string
           usd_rate?: number
           usd_withdrawal_rate?: number
+          wallet_balance_brl?: number
           wallet_balance_usd?: number
           wallet_baseline_at?: string | null
           wallet_baseline_deposits_brl?: number
@@ -81,6 +83,7 @@ export type Database = {
           updated_at?: string
           usd_rate?: number
           usd_withdrawal_rate?: number
+          wallet_balance_brl?: number
           wallet_balance_usd?: number
           wallet_baseline_at?: string | null
           wallet_baseline_deposits_brl?: number
