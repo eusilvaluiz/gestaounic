@@ -27,6 +27,10 @@ const Integration = () => {
   const [metaUntil, setMetaUntil] = useState("");
   const [isSyncingMeta, setIsSyncingMeta] = useState(false);
   const [isReconcilingMeta, setIsReconcilingMeta] = useState(false);
+  const [trackerSince, setTrackerSince] = useState("");
+  const [trackerUntil, setTrackerUntil] = useState("");
+  const [isSyncingTracker, setIsSyncingTracker] = useState(false);
+
 
   const isoSP = (offsetDays: number) =>
     new Intl.DateTimeFormat("en-CA", {
