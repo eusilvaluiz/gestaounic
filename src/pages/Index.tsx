@@ -141,32 +141,28 @@ const Index = () => {
   const totals = useMemo(() => calculateTotals(filteredData), [filteredData]);
   const funnelData = useMemo(() => calculateFunnel(totals), [totals]);
 
-  // Saldo em Carteira (USD): parte do saldo base informado e evolui com os novos lançamentos
+  // Saldo em Carteira (R$): parte do saldo base informado e evolui com os novos lançamentos
   const [walletSettings, setWalletSettings] = useState<{
-    balanceUsd: number;
+    balanceBrl: number;
     baseDep: number;
     baseSaq: number;
     baseGgr: number;
-    usdRate: number;
-    usdWithdrawalRate: number;
   } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("broker_settings")
-      .select("wallet_balance_usd, wallet_baseline_deposits_brl, wallet_baseline_withdrawals_brl, wallet_baseline_ggr_brl, usd_rate, usd_withdrawal_rate")
+      .select("wallet_balance_brl, wallet_baseline_deposits_brl, wallet_baseline_withdrawals_brl, wallet_baseline_ggr_brl")
       .eq("broker", "3x")
       .maybeSingle()
       .then(({ data: s }) => {
         if (!s) return;
         setWalletSettings({
-          balanceUsd: Number(s.wallet_balance_usd) || 0,
+          balanceBrl: Number(s.wallet_balance_brl) || 0,
           baseDep: Number(s.wallet_baseline_deposits_brl) || 0,
           baseSaq: Number(s.wallet_baseline_withdrawals_brl) || 0,
           baseGgr: Number(s.wallet_baseline_ggr_brl) || 0,
-          usdRate: Number(s.usd_rate) || 5.3,
-          usdWithdrawalRate: Number(s.usd_withdrawal_rate) || 5,
         });
       });
   }, [user]);
@@ -176,15 +172,14 @@ const Index = () => {
     const dep = data.reduce((a, r) => a + (r.valorDepositos || 0), 0);
     const saq = data.reduce((a, r) => a + (r.saque || 0), 0);
     const ggr = data.reduce((a, r) => a + (r.rev10 || 0), 0);
-    const deltaUsd =
-      (dep - walletSettings.baseDep) / walletSettings.usdRate -
-      (saq - walletSettings.baseSaq) / walletSettings.usdWithdrawalRate -
-      (ggr - walletSettings.baseGgr) / walletSettings.usdRate;
-    return walletSettings.balanceUsd + deltaUsd;
+    return (
+      walletSettings.balanceBrl +
+      (dep - walletSettings.baseDep) -
+      (saq - walletSettings.baseSaq) -
+      (ggr - walletSettings.baseGgr)
+    );
   }, [data, walletSettings]);
 
-  const formatUsd = (value: number) =>
-    `$${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 
 
