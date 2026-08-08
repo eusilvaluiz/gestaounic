@@ -9,3 +9,6 @@ verify_jwt = false
 [functions.ggr-sync]
 verify_jwt = false
 
+[functions.meta-sync]
+verify_jwt = false
+
