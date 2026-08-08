@@ -3,7 +3,8 @@ import { DailyData, CalculatedMetrics } from "@/types/marketing";
 import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calculations";
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { NumberInput } from "@/components/NumberInput";
-import { Trash2, Plus, Loader2, GripVertical, CalendarIcon, Lock, LockOpen } from "lucide-react";
+import { Trash2, Plus, Loader2, GripVertical, CalendarIcon, Lock, LockOpen, RefreshCw } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -111,6 +112,8 @@ interface DataTableProps {
   onReorderRows?: (activeId: string, overId: string) => Promise<void>;
   isLoading?: boolean;
   isSaving?: boolean;
+  onSync?: () => void;
+  isSyncing?: boolean;
 }
 
 // Sortable row component
@@ -333,7 +336,9 @@ export const DataTable = ({
   onDeleteRow,
   onReorderRows,
   isLoading = false,
-  isSaving = false 
+  isSaving = false,
+  onSync,
+  isSyncing = false
 }: DataTableProps) => {
   // Padrão: mostrar todas as linhas (sem limite)
   const [rowLimit, setRowLimit] = useState<number | "unlimited">("unlimited");
@@ -619,6 +624,22 @@ export const DataTable = ({
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-semibold text-foreground">Dados Diários</h3>
+          {onSync && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={onSync}
+                  disabled={isSyncing}
+                  aria-label="Sincronizar últimos 7 dias"
+                  className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Sincronizar últimos 7 dias (automático à meia-noite)</TooltipContent>
+            </Tooltip>
+          )}
           {isSaving && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
