@@ -271,17 +271,21 @@ Deno.serve(async (req) => {
 
   // Currency conversion: brokers that operate in USD (e.g. 3X) have a fixed
   // rate configured in broker_settings. Everything downstream is in BRL.
+  // Withdrawals use their own rate (usd_withdrawal_rate) because payouts are
+  // settled at a different fixed quote than deposits.
   let currency = "BRL";
   let usdRate = 1;
+  let usdWithdrawalRate = 1;
   const { data: settings } = await supabase
     .from("broker_settings")
-    .select("currency, usd_rate")
+    .select("currency, usd_rate, usd_withdrawal_rate")
     .eq("broker", broker)
     .maybeSingle();
 
   if (settings) {
     currency = settings.currency ?? "BRL";
     usdRate = Number(settings.usd_rate ?? 1) || 1;
+    usdWithdrawalRate = Number(settings.usd_withdrawal_rate ?? usdRate) || usdRate;
   }
 
   // IMPORTANT: the broker can send BRL and USD transactions on the same account.
@@ -298,7 +302,8 @@ Deno.serve(async (req) => {
     currency = eventCurrency;
   }
 
-  const rate = currency === "USD" ? usdRate : 1;
+  const rate =
+    currency === "USD" ? (event === "withdrawal" ? usdWithdrawalRate : usdRate) : 1;
   const amount = Number((originalAmount * rate).toFixed(2));
 
 
