@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { Copy, ArrowLeft, DollarSign } from "lucide-react";
+import { Copy, ArrowLeft, DollarSign, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
@@ -21,6 +21,29 @@ const Integration = () => {
   const [rateInput, setRateInput] = useState("");
   const [savedRate, setSavedRate] = useState<number | null>(null);
   const [isSavingRate, setIsSavingRate] = useState(false);
+  const [ggrDate, setGgrDate] = useState("");
+  const [isSyncingGgr, setIsSyncingGgr] = useState(false);
+
+  const syncGgr = async () => {
+    setIsSyncingGgr(true);
+    const { data, error } = await supabase.functions.invoke("ggr-sync", {
+      body: ggrDate.trim() ? { date: ggrDate.trim() } : {},
+    });
+    setIsSyncingGgr(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Erro ao buscar GGR",
+        description: (data as any)?.error ?? error?.message ?? "Falha na consulta.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const d = data as any;
+    toast({
+      title: `GGR de ${d.date} atualizado`,
+      description: `${d.currency} ${d.original} × ${d.rate} = R$ ${Number(d.ggr).toFixed(2).replace(".", ",")}`,
+    });
+  };
 
   useEffect(() => {
     if (!isLoading && !user) navigate("/auth");
@@ -140,6 +163,34 @@ const Integration = () => {
             </p>
           )}
         </Card>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <RefreshCw className="h-5 w-5 text-primary" /> GGR (3X Broker)
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            O GGR é buscado direto no painel da 3X (endpoint <code className="px-1 py-0.5 rounded bg-muted">/api/balance</code>),
+            convertido pela cotação acima e gravado na coluna <strong>GGR</strong> da planilha. A sincronização roda
+            automaticamente de hora em hora — use o botão para atualizar agora.
+          </p>
+          <div className="flex gap-2 items-end max-w-md">
+            <div className="flex-1 space-y-1">
+              <Label htmlFor="ggr-date">Data (opcional, AAAA-MM-DD)</Label>
+              <Input
+                id="ggr-date"
+                value={ggrDate}
+                onChange={(e) => setGgrDate(e.target.value)}
+                placeholder="hoje"
+                className="font-mono"
+              />
+            </div>
+            <Button onClick={syncGgr} disabled={isSyncingGgr}>
+              {isSyncingGgr ? "Buscando..." : "Atualizar GGR"}
+            </Button>
+          </div>
+        </Card>
+
+
 
 
         <Card className="p-6 space-y-4">

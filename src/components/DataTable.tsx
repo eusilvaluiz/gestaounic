@@ -383,7 +383,7 @@ export const DataTable = ({
     { key: 'cadastroFtd', label: 'Cadastro→FTD', colorClass: 'text-warning', minWidth: 'min-w-[95px]' },
     { key: 'depositos', label: 'Depósitos', colorClass: 'text-muted-foreground', minWidth: 'min-w-[85px]' },
     { key: 'valorDepositos', label: 'Valor Depósitos', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
-    { key: 'rev10', label: 'REV (10%)', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
+    { key: 'rev10', label: 'GGR', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
     { key: 'vendas', label: 'Vendas', colorClass: 'text-muted-foreground', minWidth: 'min-w-[145px]' },
     { key: 'taxa', label: 'Taxa', colorClass: 'text-warning', minWidth: 'min-w-[100px]' },
     { key: 'saque', label: 'Saque', colorClass: 'text-muted-foreground', minWidth: 'min-w-[100px]' },
@@ -733,7 +733,7 @@ export const DataTable = ({
                 <TableHead className="text-warning font-semibold min-w-[95px]">Cadastro→FTD</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Depósitos</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Valor Depósitos</TableHead>
-                <TableHead className="text-muted-foreground font-semibold min-w-[145px]">REV (10%)</TableHead>
+                <TableHead className="text-muted-foreground font-semibold min-w-[145px]">GGR</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Vendas</TableHead>
                 <TableHead className="text-warning font-semibold min-w-[100px]">Taxa</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Saque</TableHead>
