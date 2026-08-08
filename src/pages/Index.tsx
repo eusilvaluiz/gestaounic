@@ -338,7 +338,7 @@ const Index = () => {
             value={formatCurrency(saldoCarteira)}
             icon={<Wallet className="w-5 h-5" />}
             variant={saldoCarteira >= 0 ? "success" : "danger"}
-            subtitle="Saldo contínuo em dólar"
+            subtitle="Saldo contínuo (sem filtro)"
           />
 
 
