@@ -4,6 +4,7 @@ import { calculateMetrics, formatCurrency, formatPercent } from "@/utils/calcula
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { NumberInput } from "@/components/NumberInput";
 import { Trash2, Plus, Loader2, GripVertical, CalendarIcon, Lock, LockOpen, RefreshCw } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
