@@ -53,6 +53,11 @@ export type Database = {
           updated_at: string
           usd_rate: number
           usd_withdrawal_rate: number
+          wallet_balance_usd: number
+          wallet_baseline_at: string | null
+          wallet_baseline_deposits_brl: number
+          wallet_baseline_ggr_brl: number
+          wallet_baseline_withdrawals_brl: number
         }
         Insert: {
           broker: string
@@ -62,6 +67,11 @@ export type Database = {
           updated_at?: string
           usd_rate?: number
           usd_withdrawal_rate?: number
+          wallet_balance_usd?: number
+          wallet_baseline_at?: string | null
+          wallet_baseline_deposits_brl?: number
+          wallet_baseline_ggr_brl?: number
+          wallet_baseline_withdrawals_brl?: number
         }
         Update: {
           broker?: string
@@ -71,6 +81,11 @@ export type Database = {
           updated_at?: string
           usd_rate?: number
           usd_withdrawal_rate?: number
+          wallet_balance_usd?: number
+          wallet_baseline_at?: string | null
+          wallet_baseline_deposits_brl?: number
+          wallet_baseline_ggr_brl?: number
+          wallet_baseline_withdrawals_brl?: number
         }
         Relationships: []
       }
