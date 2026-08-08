@@ -20,6 +20,8 @@ import {
   BarChart3,
   Percent,
   LogOut,
+  Wallet,
+
   Loader2
 } from "lucide-react";
 
