@@ -193,7 +193,7 @@ const Index = () => {
     navigate("/auth");
   };
 
-  const reconcileMeta = async () => {
+  const syncAll = async () => {
     const isoSP = (offsetDays: number) =>
       new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Sao_Paulo",
@@ -203,24 +203,52 @@ const Index = () => {
       }).format(new Date(Date.now() + offsetDays * 86400000));
 
     setIsReconcilingMeta(true);
-    const { data: result, error } = await supabase.functions.invoke("meta-sync", {
+    const errors: string[] = [];
+
+    // 1. Meta Ads: últimos 7 dias
+    const meta = await supabase.functions.invoke("meta-sync", {
       body: { since: isoSP(-7), until: isoSP(-1) },
     });
+    if (meta.error || (meta.data as { error?: string } | null)?.error) {
+      errors.push(`Meta: ${(meta.data as { error?: string } | null)?.error ?? meta.error?.message ?? "falha"}`);
+    }
+
+    // 2. GGR: hoje e ontem
+    const ggrToday = await supabase.functions.invoke("ggr-sync", {
+      body: { date: isoSP(0) },
+    });
+    if (ggrToday.error || (ggrToday.data as { error?: string } | null)?.error) {
+      errors.push(`GGR hoje: ${(ggrToday.data as { error?: string } | null)?.error ?? ggrToday.error?.message ?? "falha"}`);
+    }
+    const ggrYesterday = await supabase.functions.invoke("ggr-sync", {
+      body: { date: isoSP(-1) },
+    });
+    if (ggrYesterday.error || (ggrYesterday.data as { error?: string } | null)?.error) {
+      errors.push(`GGR ontem: ${(ggrYesterday.data as { error?: string } | null)?.error ?? ggrYesterday.error?.message ?? "falha"}`);
+    }
+
+    // 3. Alpha Tracker: últimos 7 dias
+    const tracker = await supabase.functions.invoke("tracker-sync", {
+      body: { since: isoSP(-7), until: isoSP(-1) },
+    });
+    if (tracker.error || (tracker.data as { error?: string } | null)?.error) {
+      errors.push(`Tracker: ${(tracker.data as { error?: string } | null)?.error ?? tracker.error?.message ?? "falha"}`);
+    }
+
     setIsReconcilingMeta(false);
 
-    if (error || (result as { error?: string } | null)?.error) {
+    if (errors.length > 0) {
       toast({
-        title: "Erro na reconciliação",
-        description: (result as { error?: string } | null)?.error ?? error?.message ?? "Falha na consulta.",
+        title: "Sync parcial concluído",
+        description: errors.join(" | "),
         variant: "destructive",
       });
       return;
     }
 
-    const updatedDays = (result as { results?: unknown[] } | null)?.results?.length ?? 0;
     toast({
-      title: "Últimos 7 dias reconciliados",
-      description: `${updatedDays} dia(s) atualizado(s) com os valores finais da Meta.`,
+      title: "Tudo sincronizado",
+      description: "Meta, GGR e saídas do Alpha Tracker atualizados.",
     });
   };
 
