@@ -85,7 +85,31 @@ const Integration = () => {
     });
   };
 
+  const syncTracker = async () => {
+    setIsSyncingTracker(true);
+    const body: Record<string, string> = {};
+    if (trackerSince.trim()) body.since = trackerSince.trim();
+    if (trackerUntil.trim()) body.until = trackerUntil.trim();
+    const { data, error } = await supabase.functions.invoke("tracker-sync", { body });
+    setIsSyncingTracker(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Erro ao buscar saídas",
+        description: (data as any)?.error ?? error?.message ?? "Falha na consulta.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const d = data as any;
+    const dias = (d.results ?? []).map((r: any) => r.date).join(", ");
+    toast({
+      title: "Saídas do canal atualizadas",
+      description: `dias: ${dias || "nenhum dado no período"}`,
+    });
+  };
+
   const syncGgr = async () => {
+
     setIsSyncingGgr(true);
     const { data, error } = await supabase.functions.invoke("ggr-sync", {
       body: ggrDate.trim() ? { date: ggrDate.trim() } : {},
