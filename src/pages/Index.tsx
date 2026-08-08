@@ -20,6 +20,8 @@ import {
   BarChart3,
   Percent,
   LogOut,
+  Wallet,
+
   Loader2
 } from "lucide-react";
 
@@ -137,6 +139,15 @@ const Index = () => {
   const totals = useMemo(() => calculateTotals(filteredData), [filteredData]);
   const funnelData = useMemo(() => calculateFunnel(totals), [totals]);
 
+  // Saldo em Carteira: contínuo, independe de filtros (usa todos os dados)
+  const saldoCarteira = useMemo(() => {
+    return data.reduce(
+      (acc, row) => acc + (row.valorDepositos || 0) - (row.saque || 0) - (row.rev10 || 0),
+      0
+    );
+  }, [data]);
+
+
   const handleDateRangeChange = (option: DateRangeOption, range?: DateRange) => {
     setDateRangeOption(option);
     if (option === "custom" && range) {
@@ -240,7 +251,7 @@ const Index = () => {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Investimento"
             value={formatCurrency(totals.investimento)}
@@ -287,6 +298,14 @@ const Index = () => {
             icon={<Percent className="w-5 h-5" />}
             variant={totalMetrics.roiTotal >= 1 ? "success" : "danger"}
           />
+          <MetricCard
+            title="Saldo em Carteira"
+            value={formatCurrency(saldoCarteira)}
+            icon={<Wallet className="w-5 h-5" />}
+            variant={saldoCarteira >= 0 ? "success" : "danger"}
+            subtitle="Total contínuo (sem filtro)"
+          />
+
         </div>
 
         {/* Funnel and Finance */}
