@@ -321,6 +321,43 @@ const Integration = () => {
           </div>
         </Card>
 
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <RefreshCw className="h-5 w-5 text-primary" /> Saídas do canal (Alpha Tracker)
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            A coluna <strong>Saída Telegram</strong> é buscada direto no CRM Alpha Tracker, dia a dia (00:00–23:59, fuso
+            de São Paulo). Roda automaticamente a cada 15 minutos (hoje e ontem). Use o botão para atualizar agora ou
+            reprocessar um período.
+          </p>
+          <div className="flex gap-2 items-end flex-wrap">
+            <div className="space-y-1">
+              <Label htmlFor="tracker-since">Início (opcional)</Label>
+              <Input
+                id="tracker-since"
+                value={trackerSince}
+                onChange={(e) => setTrackerSince(e.target.value)}
+                placeholder="AAAA-MM-DD"
+                className="font-mono w-40"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="tracker-until">Fim (opcional)</Label>
+              <Input
+                id="tracker-until"
+                value={trackerUntil}
+                onChange={(e) => setTrackerUntil(e.target.value)}
+                placeholder="AAAA-MM-DD"
+                className="font-mono w-40"
+              />
+            </div>
+            <Button onClick={syncTracker} disabled={isSyncingTracker}>
+              {isSyncingTracker ? "Buscando..." : "Atualizar saídas"}
+            </Button>
+          </div>
+        </Card>
+
+
 
 
 
