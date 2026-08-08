@@ -137,6 +137,15 @@ const Index = () => {
   const totals = useMemo(() => calculateTotals(filteredData), [filteredData]);
   const funnelData = useMemo(() => calculateFunnel(totals), [totals]);
 
+  // Saldo em Carteira: contínuo, independe de filtros (usa todos os dados)
+  const saldoCarteira = useMemo(() => {
+    return data.reduce(
+      (acc, row) => acc + (row.valorDepositos || 0) - (row.saque || 0) - (row.rev10 || 0),
+      0
+    );
+  }, [data]);
+
+
   const handleDateRangeChange = (option: DateRangeOption, range?: DateRange) => {
     setDateRangeOption(option);
     if (option === "custom" && range) {
