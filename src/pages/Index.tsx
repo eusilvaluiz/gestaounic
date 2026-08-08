@@ -8,7 +8,7 @@ import { FinancePanel } from "@/components/FinancePanel";
 import { DateRangeFilter, DateRangeOption, DateRange, getDateRangeFromOption } from "@/components/DateRangeFilter";
 import { useDailyData } from "@/hooks/useDailyData";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+
 
 import { Button } from "@/components/ui/button";
 import { DailyData } from "@/types/marketing";
@@ -141,44 +141,8 @@ const Index = () => {
   const totals = useMemo(() => calculateTotals(filteredData), [filteredData]);
   const funnelData = useMemo(() => calculateFunnel(totals), [totals]);
 
-  // Saldo em Carteira (R$): parte do saldo base informado e evolui com os novos lançamentos
-  const [walletSettings, setWalletSettings] = useState<{
-    balanceBrl: number;
-    baseDep: number;
-    baseSaq: number;
-    baseGgr: number;
-  } | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("broker_settings")
-      .select("wallet_balance_brl, wallet_baseline_deposits_brl, wallet_baseline_withdrawals_brl, wallet_baseline_ggr_brl")
-      .eq("broker", "3x")
-      .maybeSingle()
-      .then(({ data: s }) => {
-        if (!s) return;
-        setWalletSettings({
-          balanceBrl: Number(s.wallet_balance_brl) || 0,
-          baseDep: Number(s.wallet_baseline_deposits_brl) || 0,
-          baseSaq: Number(s.wallet_baseline_withdrawals_brl) || 0,
-          baseGgr: Number(s.wallet_baseline_ggr_brl) || 0,
-        });
-      });
-  }, [user]);
 
-  const saldoCarteira = useMemo(() => {
-    if (!walletSettings) return 0;
-    const dep = data.reduce((a, r) => a + (r.valorDepositos || 0), 0);
-    const saq = data.reduce((a, r) => a + (r.saque || 0), 0);
-    const ggr = data.reduce((a, r) => a + (r.rev10 || 0), 0);
-    return (
-      walletSettings.balanceBrl +
-      (dep - walletSettings.baseDep) -
-      (saq - walletSettings.baseSaq) -
-      (ggr - walletSettings.baseGgr)
-    );
-  }, [data, walletSettings]);
 
 
 
@@ -334,12 +298,12 @@ const Index = () => {
             variant={totalMetrics.roiTotal >= 1 ? "success" : "danger"}
           />
           <MetricCard
-            title="Saldo em Carteira"
-            value={formatCurrency(saldoCarteira)}
+            title="GGR"
+            value={formatCurrency(totals.rev10)}
             icon={<Wallet className="w-5 h-5" />}
-            variant={saldoCarteira >= 0 ? "success" : "danger"}
-            subtitle="Saldo contínuo (sem filtro)"
+            variant={totals.rev10 >= 0 ? "success" : "danger"}
           />
+
 
 
         </div>
