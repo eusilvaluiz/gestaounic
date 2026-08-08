@@ -111,6 +111,8 @@ interface DataTableProps {
   onReorderRows?: (activeId: string, overId: string) => Promise<void>;
   isLoading?: boolean;
   isSaving?: boolean;
+  onSync?: () => void;
+  isSyncing?: boolean;
 }
 
 // Sortable row component
