@@ -52,6 +52,7 @@ export type Database = {
           id: string
           updated_at: string
           usd_rate: number
+          usd_withdrawal_rate: number
         }
         Insert: {
           broker: string
@@ -60,6 +61,7 @@ export type Database = {
           id?: string
           updated_at?: string
           usd_rate?: number
+          usd_withdrawal_rate?: number
         }
         Update: {
           broker?: string
@@ -68,6 +70,7 @@ export type Database = {
           id?: string
           updated_at?: string
           usd_rate?: number
+          usd_withdrawal_rate?: number
         }
         Relationships: []
       }
