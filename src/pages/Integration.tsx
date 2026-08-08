@@ -21,6 +21,29 @@ const Integration = () => {
   const [rateInput, setRateInput] = useState("");
   const [savedRate, setSavedRate] = useState<number | null>(null);
   const [isSavingRate, setIsSavingRate] = useState(false);
+  const [ggrDate, setGgrDate] = useState("");
+  const [isSyncingGgr, setIsSyncingGgr] = useState(false);
+
+  const syncGgr = async () => {
+    setIsSyncingGgr(true);
+    const { data, error } = await supabase.functions.invoke("ggr-sync", {
+      body: ggrDate.trim() ? { date: ggrDate.trim() } : {},
+    });
+    setIsSyncingGgr(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Erro ao buscar GGR",
+        description: (data as any)?.error ?? error?.message ?? "Falha na consulta.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const d = data as any;
+    toast({
+      title: `GGR de ${d.date} atualizado`,
+      description: `${d.currency} ${d.original} × ${d.rate} = R$ ${Number(d.ggr).toFixed(2).replace(".", ",")}`,
+    });
+  };
 
   useEffect(() => {
     if (!isLoading && !user) navigate("/auth");
