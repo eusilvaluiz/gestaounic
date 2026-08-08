@@ -296,6 +296,14 @@ const Index = () => {
             icon={<Percent className="w-5 h-5" />}
             variant={totalMetrics.roiTotal >= 1 ? "success" : "danger"}
           />
+          <MetricCard
+            title="Saldo em Carteira"
+            value={formatCurrency(saldoCarteira)}
+            icon={<Wallet className="w-5 h-5" />}
+            variant={saldoCarteira >= 0 ? "success" : "danger"}
+            subtitle="Total contínuo (sem filtro)"
+          />
+
         </div>
 
         {/* Funnel and Finance */}
