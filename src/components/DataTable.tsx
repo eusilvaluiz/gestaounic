@@ -335,7 +335,9 @@ export const DataTable = ({
   onDeleteRow,
   onReorderRows,
   isLoading = false,
-  isSaving = false 
+  isSaving = false,
+  onSync,
+  isSyncing = false
 }: DataTableProps) => {
   // Padrão: mostrar todas as linhas (sem limite)
   const [rowLimit, setRowLimit] = useState<number | "unlimited">("unlimited");
