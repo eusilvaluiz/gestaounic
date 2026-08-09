@@ -50,28 +50,29 @@ type SyncResult = {
 
 async function syncDay(
   supabase: ReturnType<typeof createClient>,
-  token: string,
+  statsUrl: string,
+  statsKey: string,
   iso: string,
   usdRate: number,
 ): Promise<SyncResult> {
   const date = isoToBR(iso);
 
-  // A API da 3X consolida o dia inteiro (00:00:00 -> 23:59:59) quando date == enddate
+  // Worker proxy da 3X (mantém o token admin fora daqui)
   const apiUrl =
-    `https://trade.3xbroker.com/api/balance?currency=&country_code=` +
-    `&token=${encodeURIComponent(token)}&date=${iso}&enddate=${iso}`;
+    `${statsUrl.replace(/\/$/, "")}/balance?key=${encodeURIComponent(statsKey)}` +
+    `&date=${iso}&enddate=${iso}`;
 
   let payload: any;
   try {
     const res = await fetch(apiUrl, { headers: { Accept: "application/json" } });
-    if (res.status === 401 || res.status === 403) {
-      return { date, error: "Token do painel da 3X expirado ou inválido" };
+    payload = await res.json().catch(() => null);
+    if (payload?.error) {
+      return { date, error: `Token do painel da 3X expirado — renove via POST /set-token no Worker` };
     }
-    if (!res.ok) return { date, error: `API da 3X retornou ${res.status}` };
-    payload = await res.json();
+    if (!res.ok) return { date, error: `Worker da 3X retornou ${res.status}` };
   } catch (e) {
     console.error("[ggr-sync] fetch error:", e);
-    return { date, error: "Falha ao consultar a API da 3X" };
+    return { date, error: "Falha ao consultar o Worker da 3X" };
   }
 
   const ggrOriginal = parseBRNumber(payload?.real_total ?? payload?.total);
@@ -79,6 +80,7 @@ async function syncDay(
     console.error("[ggr-sync] unexpected payload:", JSON.stringify(payload).slice(0, 600));
     return { date, error: "Não foi possível ler o GGR na resposta da 3X" };
   }
+
 
   const apiCurrency = String(payload?.site_currency?.short_name ?? "USD").toUpperCase().trim();
   const rate = apiCurrency === "BRL" ? 1 : usdRate;
