@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
 
   const results: SyncResult[] = [];
   for (const iso of dates) {
-    results.push(await syncDay(supabase, token, iso, usdRate));
+    results.push(await syncDay(supabase, statsUrl, statsKey, iso, usdRate));
   }
 
   const failed = results.filter((r) => r.error);
