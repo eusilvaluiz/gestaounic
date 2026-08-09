@@ -138,8 +138,10 @@ async function syncDay(
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const token = Deno.env.get("BROKER_ADMIN_TOKEN");
-  if (!token) return json({ error: "BROKER_ADMIN_TOKEN não configurado" }, 500);
+  const statsUrl = Deno.env.get("BROKER_STATS_URL");
+  const statsKey = Deno.env.get("BROKER_STATS_KEY");
+  if (!statsUrl || !statsKey) return json({ error: "Worker de stats da 3X não configurado" }, 500);
+
 
   const url = new URL(req.url);
   let bodyDate: string | undefined;
