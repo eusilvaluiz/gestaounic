@@ -173,6 +173,14 @@ const Index = () => {
     const cadastroFtdTotal = totals.cadastros > 0 ? (totals.ftd / totals.cadastros) * 100 : 0;
     const roiTotal = totals.investimento > 0 ? totals.valorDepositos / totals.investimento : 0;
 
+    // Média de gasto diário: considera apenas dias (datas válidas) com investimento > 0
+    const diasComGasto = new Set(
+      filteredData
+        .filter((row) => isCompleteDateString(row.data) && row.investimento > 0)
+        .map((row) => row.data.trim())
+    ).size;
+    const mediaGastoDiario = diasComGasto > 0 ? totals.investimento / diasComGasto : 0;
+
     return {
       cpcTotal,
       cpvTotal,
@@ -184,9 +192,11 @@ const Index = () => {
       leadCadastroTotal,
       custoFtdTotal,
       cadastroFtdTotal,
-      roiTotal
+      roiTotal,
+      mediaGastoDiario
     };
-  }, [totals]);
+  }, [totals, filteredData]);
+
 
   const handleSignOut = async () => {
     await signOut();
@@ -319,7 +329,9 @@ const Index = () => {
             value={formatCurrency(totals.investimento)}
             icon={<DollarSign className="w-5 h-5" />}
             variant="danger"
+            subtitle={`Média/dia: ${formatCurrency(totalMetrics.mediaGastoDiario)}`}
           />
+
           <MetricCard
             title="Cliques"
             value={formatNumber(totals.cliques)}
