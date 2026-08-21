@@ -329,7 +329,9 @@ const Index = () => {
             value={formatCurrency(totals.investimento)}
             icon={<DollarSign className="w-5 h-5" />}
             variant="danger"
+            subtitle={`Média/dia: ${formatCurrency(totalMetrics.mediaGastoDiario)}`}
           />
+
           <MetricCard
             title="Cliques"
             value={formatNumber(totals.cliques)}
