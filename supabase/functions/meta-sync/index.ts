@@ -48,16 +48,41 @@ async function fetchAccounts(token: string) {
   return (payload?.data ?? []) as Array<{ id: string; name: string; currency: string }>;
 }
 
+function daysBetween(since: string, until: string): string[] {
+  const out: string[] = [];
+  const d = new Date(`${since}T12:00:00Z`);
+  const end = new Date(`${until}T12:00:00Z`);
+  while (d <= end && out.length < 62) {
+    out.push(d.toISOString().slice(0, 10));
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+  return out;
+}
+
+// Meta passou a retornar spend "0" em consultas multi-dia com time_increment.
+// Por isso consultamos um dia por vez.
 async function fetchAccountInsights(
   token: string,
   accountId: string,
   since: string,
   until: string,
 ): Promise<Record<string, DayTotals>> {
-  const timeRange = encodeURIComponent(JSON.stringify({ since, until }));
+  const all: Record<string, DayTotals> = {};
+  for (const day of daysBetween(since, until)) {
+    Object.assign(all, await fetchAccountDay(token, accountId, day));
+  }
+  return all;
+}
+
+async function fetchAccountDay(
+  token: string,
+  accountId: string,
+  day: string,
+): Promise<Record<string, DayTotals>> {
+  const timeRange = encodeURIComponent(JSON.stringify({ since: day, until: day }));
   const url =
     `${API}/${accountId}/insights?level=account&fields=spend,actions` +
-    `&time_range=${timeRange}&time_increment=1&access_token=${token}`;
+    `&time_range=${timeRange}&access_token=${token}`;
 
   const res = await fetch(url);
   const payload = await res.json();
@@ -67,7 +92,6 @@ async function fetchAccountInsights(
   }
 
   const perDay: Record<string, DayTotals> = {};
-  console.log(`[meta-sync] raw ${accountId}:`, JSON.stringify((payload?.data ?? []).map((r: any) => ({ d: r.date_start, spend: r.spend }))), JSON.stringify(payload?.error ?? null));
   for (const row of payload?.data ?? []) {
     const actions: Record<string, string> = {};
     for (const a of row?.actions ?? []) actions[a.action_type] = a.value;
