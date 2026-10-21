@@ -67,6 +67,7 @@ async function fetchAccountInsights(
   }
 
   const perDay: Record<string, DayTotals> = {};
+  console.log(`[meta-sync] raw ${accountId}:`, JSON.stringify((payload?.data ?? []).map((r: any) => ({ d: r.date_start, spend: r.spend }))), JSON.stringify(payload?.error ?? null));
   for (const row of payload?.data ?? []) {
     const actions: Record<string, string> = {};
     for (const a of row?.actions ?? []) actions[a.action_type] = a.value;
