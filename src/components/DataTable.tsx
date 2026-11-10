@@ -8,6 +8,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -178,7 +179,7 @@ const SortableRow = ({
           disabled={!isEditingEnabled}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className="relative">
         <CurrencyInput
           value={row.investimento}
           onChange={(val) => handleCellChange(row.id, "investimento", val)}
@@ -186,6 +187,24 @@ const SortableRow = ({
           placeholder="0,00"
           disabled={!isEditingEnabled}
         />
+      {row.manualFields?.includes("investimento") && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label="Destravar Investimento"
+                onClick={async () => {
+                  const { error } = await supabase.from("daily_data").update({ manual_fields: (row.manualFields ?? []).filter((f) => f !== "investimento") } as any).eq("id", row.id);
+                  if (error) toast.error("Erro ao destravar"); else toast.success("Investimento volta a atualizar sozinho");
+                }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-primary"
+              >
+                <Lock className="h-3 w-3" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Preenchido manualmente — não será atualizado. Clique para destravar.</TooltipContent>
+          </Tooltip>
+        )}
       </TableCell>
       <TableCell>
         <NumberInput
@@ -206,13 +225,31 @@ const SortableRow = ({
       </TableCell>
       <TableCell>{renderMetricsCell(metrics.cpv, false, true)}</TableCell>
       <TableCell>{renderMetricsCell(metrics.cliqueLp, true)}</TableCell>
-      <TableCell>
+      <TableCell className="relative">
         <NumberInput
           value={row.leadTelegram}
           onChange={(val) => handleCellChange(row.id, "leadTelegram", val)}
           className="h-8 text-xs min-w-[70px] bg-transparent border-none focus-visible:ring-1 focus-visible:ring-primary"
           disabled={!isEditingEnabled}
         />
+      {row.manualFields?.includes("lead_telegram") && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label="Destravar Lead Telegram"
+                onClick={async () => {
+                  const { error } = await supabase.from("daily_data").update({ manual_fields: (row.manualFields ?? []).filter((f) => f !== "lead_telegram") } as any).eq("id", row.id);
+                  if (error) toast.error("Erro ao destravar"); else toast.success("Lead Telegram volta a atualizar sozinho");
+                }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-primary"
+              >
+                <Lock className="h-3 w-3" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Preenchido manualmente — não será atualizado. Clique para destravar.</TooltipContent>
+          </Tooltip>
+        )}
       </TableCell>
       <TableCell>
         <NumberInput

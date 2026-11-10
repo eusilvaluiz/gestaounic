@@ -25,6 +25,7 @@ interface DbDailyData {
   saque: number;
   expert: number;
   sort_order: number;
+  manual_fields?: string[] | null;
 }
 
 const mapDbToLocal = (row: DbDailyData): DailyData => ({
@@ -46,6 +47,7 @@ const mapDbToLocal = (row: DbDailyData): DailyData => ({
   saque: Number(row.saque),
   expert: Number(row.expert),
   sortOrder: row.sort_order,
+  manualFields: row.manual_fields ?? [],
 });
 
 const mapLocalToDb = (row: DailyData): Omit<DbDailyData, 'id'> & { id?: string } => ({

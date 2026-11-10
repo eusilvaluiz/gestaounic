@@ -105,6 +105,7 @@ export type Database = {
           investimento: number
           landing_page: number
           lead_telegram: number
+          manual_fields: string[]
           rev10: number
           saida_telegram: number
           saque: number
@@ -127,6 +128,7 @@ export type Database = {
           investimento?: number
           landing_page?: number
           lead_telegram?: number
+          manual_fields?: string[]
           rev10?: number
           saida_telegram?: number
           saque?: number
@@ -149,6 +151,7 @@ export type Database = {
           investimento?: number
           landing_page?: number
           lead_telegram?: number
+          manual_fields?: string[]
           rev10?: number
           saida_telegram?: number
           saque?: number

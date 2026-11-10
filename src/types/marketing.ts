@@ -17,6 +17,7 @@ export interface DailyData {
   saque: number;
   expert: number;
   sortOrder?: number;
+  manualFields?: string[];
 }
 
 export interface CalculatedMetrics {
