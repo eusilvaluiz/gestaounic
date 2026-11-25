@@ -161,7 +161,8 @@ const SortableRow = ({
       ref={setNodeRef} 
       style={style} 
       onClick={() => onRowClick(row.id)}
-      className={`border-border hover:bg-accent/50 cursor-pointer transition-all ${
+      data-selected={isSelected}
+      className={`daily-data-row border-border hover:bg-accent/50 cursor-pointer transition-all ${
         isSelected ? 'ring-2 ring-primary ring-inset bg-primary/5' : ''
       } ${!isEditingEnabled ? 'opacity-95' : ''}`}
     >
@@ -172,7 +173,7 @@ const SortableRow = ({
       >
         <GripVertical className={`w-4 h-4 ${isEditingEnabled ? 'text-muted-foreground' : 'text-muted-foreground/70'}`} />
       </TableCell>
-      <TableCell>
+      <TableCell className="date-column sticky left-0 z-10">
         <DatePickerCell
           value={row.data}
           onChange={(newDate) => handleCellChange(row.id, "data", newDate)}
@@ -731,8 +732,13 @@ export const DataTable = ({
                   {columnDefs.map((col, index) => (
                     <th 
                       key={col.key}
-                      style={{ width: columnWidths[index] }}
-                      className={`h-12 px-4 text-left align-middle font-semibold ${col.colorClass}`}
+                      style={{
+                        width: columnWidths[index],
+                        transform: col.key === 'data'
+                          ? `translateX(${Math.max(0, scrollLeft - (columnWidths[0] ?? 0))}px)`
+                          : undefined,
+                      }}
+                      className={`h-12 px-4 text-left align-middle font-semibold ${col.colorClass} ${col.key === 'data' ? 'date-column relative z-10' : ''}`}
                     >
                       {col.label}
                     </th>
@@ -770,7 +776,7 @@ export const DataTable = ({
             <TableHeader ref={headerRef}>
               <TableRow className="hover:bg-transparent border-border bg-[hsl(222,47%,12%)]">
                 <TableHead className="w-10"></TableHead>
-                <TableHead className="text-muted-foreground font-semibold min-w-[100px]">Data</TableHead>
+                <TableHead className="date-column sticky left-0 z-20 text-muted-foreground font-semibold min-w-[100px]">Data</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[145px]">Investimento</TableHead>
                 <TableHead className="text-muted-foreground font-semibold min-w-[85px]">Cliques</TableHead>
                 <TableHead className="text-info font-semibold min-w-[100px]">CPC</TableHead>
